@@ -174,11 +174,11 @@ def runDictzip(filename):
 	).communicate()
 #	out = p3[1].read()
 #	err = p3[2].read()
-#	log.debug("dictzip command: \"%s\""%dictzipCmd)
+#	log.debug("dictzip command: \"%s\"", dictzipCmd)
 #	if err:
-#		log.error("dictzip error: %s"%err.replace("\n", " "))
+#		log.error("dictzip error: %s", err.replace("\n", " "))
 #	if out:
-#		log.error("dictzip error: %s"%out.replace("\n", " "))
+#		log.error("dictzip error: %s", out.replace("\n", " "))
 
 
 def isControlChar(y):
