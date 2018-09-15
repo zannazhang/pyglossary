@@ -123,9 +123,9 @@ class Glossary(object):
 		"""
 		executed on startup.  as name implies, loads plugins from directory
 		"""
-		log.debug("Loading plugins from directory: %r" % directory)
+		log.debug("Loading plugins from directory: %r", directory)
 		if not isdir(directory):
-			log.error("Invalid plugin directory: %r" % directory)
+			log.error("Invalid plugin directory: %r", directory)
 			return
 
 		sys.path.append(directory)
@@ -141,11 +141,11 @@ class Glossary(object):
 			log.warning("Module %r not found, skipping plugin %r", e.name, pluginName)
 			return
 		except Exception as e:
-			log.exception("Error while importing plugin %s" % pluginName)
+			log.exception("Error while importing plugin %s", pluginName)
 			return
 
 		if (not hasattr(plugin, "enable")) or (not plugin.enable):
-			log.debug("Plugin disabled or not a plugin: %s" % pluginName)
+			log.debug("Plugin disabled or not a plugin: %s", pluginName)
 			return
 
 		format = plugin.format
@@ -440,7 +440,7 @@ class Glossary(object):
 			pass
 
 		if origKey != key:
-			log.debug("setInfo: %s -> %s" % (origKey, key))
+			log.debug("setInfo: %s -> %s", origKey, key)
 
 		self._info[key] = value
 
@@ -564,7 +564,7 @@ class Glossary(object):
 			if not format:
 				# if delFile:
 				#	os.remove(filename)
-				log.error("Unknown extension \"%s\" for read support!" % ext)
+				log.error("Unknown extension \"%s\" for read support!", ext)
 				return False
 		validOptionKeys = self.formatsReadOptions[format]
 		for key in list(options.keys()):
@@ -668,7 +668,7 @@ class Glossary(object):
 			if sort:
 				sortKey = self._sortKey
 				cacheSize = self._sortCacheSize
-				log.info("Stream sorting enabled, cache size: %s" % cacheSize)
+				log.info("Stream sorting enabled, cache size: %s", cacheSize)
 				# only sort by main word, or list of words + alternates? FIXME
 				gen = hsortStreamList(
 					self._readers,
@@ -742,7 +742,7 @@ class Glossary(object):
 
 		else:  # filename is empty
 			if not self._filename:
-				log.error("Invalid filename %r" % filename)
+				log.error("Invalid filename %r", filename)
 				return
 			filename = self._filename  # no extension
 			if not format:
@@ -783,7 +783,7 @@ class Glossary(object):
 		try:
 			validOptionKeys = self.formatsWriteOptions[format]
 		except KeyError:
-			log.critical("No write support for \"%s\" format" % format)
+			log.critical("No write support for \"%s\" format", format)
 			return
 		for key in list(options.keys()):
 			if key not in validOptionKeys:
@@ -807,7 +807,7 @@ class Glossary(object):
 					", falling back to indirect mode"
 				)
 				self._inactivateDirectMode()
-				log.info("Loaded %s entries" % len(self._data))
+				log.info("Loaded %s entries", len(self._data))
 			sort = True
 		elif sortOnWrite == DEFAULT_YES:
 			if sort is None:
@@ -851,7 +851,7 @@ class Glossary(object):
 			self._updateIter(sort=False)
 
 		filename = abspath(filename)
-		log.info("Writing to file \"%s\"" % filename)
+		log.info("Writing to file \"%s\"", filename)
 		try:
 			self.writeFunctions[format].__call__(self, filename, **options)
 		except Exception:
@@ -936,7 +936,7 @@ class Glossary(object):
 			format=outputFormat,
 		)
 		if not outputArgs:
-			log.error("Writing file \"%s\" failed." % outputFilename)
+			log.error("Writing file \"%s\" failed.", outputFilename)
 			return
 		outputFilename, outputFormat, archiveType = outputArgs
 
@@ -965,14 +965,14 @@ class Glossary(object):
 		)
 		log.info("")
 		if not finalOutputFile:
-			log.error("Writing file \"%s\" failed." % outputFilename)
+			log.error("Writing file \"%s\" failed.", outputFilename)
 			return
 
 		if archiveType:
 			finalOutputFile = self.archiveOutDir(finalOutputFile, archiveType)
 
-		log.info("Writing file \"%s\" done." % finalOutputFile)
-		log.info("Running time of convert: %.1f seconds" % (now() - tm0))
+		log.info("Writing file \"%s\" done.", finalOutputFile)
+		log.info("Running time of convert: %.1f seconds", now() - tm0)
 
 		return finalOutputFile
 
