@@ -58,8 +58,8 @@ class Reader(object):
 				len(files)
 				for _, _, files in os.walk(self._articlesDir)
 			)
-			log.debug("Counting articles took %.2f seconds" % (now() - t0))
-			log.info("Found %s articles" % self._len)
+			log.debug("Counting articles took %.2f seconds", now() - t0)
+			log.info("Found %s articles", self._len)
 		return self._len
 
 	def __iter__(self):
@@ -83,10 +83,10 @@ class Reader(object):
 				fname, ext = splitext(fname_html)
 				# fpathRel = join(dirpathRel, fname_html)
 				if ext != ".html":
-					log.warning("unkown article extention: %s" % fname_ext)
+					log.warning("unkown article extention: %s", fname_ext)
 					continue
 				if self.isSpecialByPath(fname):  # , prefix
-					# log.debug("Skipping special page file: %s" % fpathRel)
+					# log.debug("Skipping special page file: %s", fpathRel)
 					self._specialCount += 1
 					yield None  # updates progressbar
 					continue
@@ -97,7 +97,7 @@ class Reader(object):
 					continue
 
 				yield self._glos.newEntry(word, defi)
-		log.info("Skipped %s special page files" % self._specialCount)
+		log.info("Skipped %s special page files", self._specialCount)
 
 	def isSpecialByPath(self, fname):  # , d_prefix
 		"""
@@ -119,7 +119,7 @@ class Reader(object):
 		# if fname[0] == dirParts[0]:
 		#	return False
 		# if list(fname[:3]) != dirParts:
-		#	log.debug("dirParts=%r, fname=%r" % (dirParts, fname))
+		#	log.debug("dirParts=%r, fname=%r", dirParts, fname)
 		# l_fname = fname.lower()
 		# for ext in ("png", "jpg", "jpeg", "gif", "svg", "pdf", "js"):
 		#	if "." + ext in l_fname:
@@ -131,10 +131,10 @@ class Reader(object):
 			with open(fpath) as fileObj:
 				text = fileObj.read()
 		except UnicodeDecodeError:
-			log.error("error decoding file %r, not UTF-8" % fpath)
+			log.error("error decoding file %r, not UTF-8", fpath)
 			return
 		except:
-			log.exception("error reading file %r" % fpath)
+			log.exception("error reading file %r", fpath)
 			return
 
 		root = BeautifulSoup(text, "lxml")
@@ -167,21 +167,21 @@ class Reader(object):
 		except AttributeError:
 			content = None
 		if not content:
-			log.warning("could not find \"content\" element: %s" % fpath)
+			log.warning("could not find \"content\" element: %s", fpath)
 			return
 
 		try:
 			firstHeading = content.find("h1", class_="firstHeading").text
 		except AttributeError:
-			log.warning("could not find \"firstHeading\" element: %s" % fpath)
+			log.warning("could not find \"firstHeading\" element: %s", fpath)
 			return
 
 		if firstHeading != word:
-			log.debug("word=%r, firstHeading=%r" % (firstHeading, word))
+			log.debug("word=%r, firstHeading=%r", firstHeading, word)
 
 		bodyContent = content.find(id="bodyContent")
 		if not bodyContent:
-			log.warning("could not find \"bodyContent\" element: %s" % fpath)
+			log.warning("could not find \"bodyContent\" element: %s", fpath)
 			return
 
 		# FIXME

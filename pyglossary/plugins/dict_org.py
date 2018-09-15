@@ -47,14 +47,14 @@ def installToDictd(filename, title=""):
 	"""
 	import shutil
 	targetDir = "/usr/share/dictd/"
-	log.info("Installing %r to DICTD server" % filename)
+	log.info("Installing %r to DICTD server", filename)
 
 	if os.path.isfile(filename + ".dict.dz"):
 		dictPostfix = ".dict.dz"
 	elif os.path.isfile(filename + ".dict"):
 		dictPostfix = ".dict"
 	else:
-		log.error("No .dict file, could not install dictd file %r" % filename)
+		log.error("No .dict file, could not install dictd file %r", filename)
 		return False
 
 	if not filename.startswith(targetDir):
@@ -150,7 +150,7 @@ class Reader(object):
 		# ____________________________________________________ #
 
 		if wrongSortedN > 0:
-			log.warning("Warning: wrong sorting count: %d" % wrongSortedN)
+			log.warning("Warning: wrong sorting count: %d", wrongSortedN)
 		self._len = wordCount
 
 

@@ -34,11 +34,11 @@ def read(
 
 		if defi.startswith("@@@LINK="):
 			if not lastEntry:
-				log.error("alternate section not after a word: %s" % defi)
+				log.error("alternate section not after a word: %s", defi)
 				continue
 			mainWord = defi.partition("=")[2]
 			if lastEntry.getWords()[0] != mainWord:
-				log.error("alternate is not ride after word: %s" % defi)
+				log.error("alternate is not ride after word: %s", defi)
 				continue
 			lastEntry.addAlt(word)
 			continue

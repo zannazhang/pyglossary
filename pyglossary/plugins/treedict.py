@@ -58,7 +58,7 @@ def write(glos, filename, encoding="utf-8", archive="tar.bz2", sep=os.sep):
 				stdout=subprocess.PIPE
 			).communicate()
 		else:
-			log.error("Undefined archive format: \"%s\"" % archive)
+			log.error("Undefined archive format: \"%s\"", archive)
 		try:
 			shutil.rmtree(filename, ignore_errors=True)
 		except:
