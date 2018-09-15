@@ -342,7 +342,7 @@ class BglReader(object):
 						"in debug mode, add -v4 to enable debug mode"
 					)
 				else:
-					log.error("BGL Reader: invalid option %r" % key)
+					log.error("BGL Reader: invalid option %r", key)
 			return False
 
 		self._filename = filename
@@ -369,7 +369,7 @@ class BglReader(object):
 	def openGzip(self):
 		with open(self._filename, "rb") as bglFile:
 			if not bglFile:
-				log.error("file pointer empty: %s" % bglFile)
+				log.error("file pointer empty: %s", bglFile)
 				return False
 			b_head = bglFile.read(6)
 
@@ -377,14 +377,14 @@ class BglReader(object):
 			b"\x12\x34\x00\x01",
 			b"\x12\x34\x00\x02",
 		):
-			log.error("invalid header: %r" % b_head[:6])
+			log.error("invalid header: %r", b_head[:6])
 			return False
 
 		self.gzipOffset = gzipOffset = binStrToInt(b_head[4:6])
-		log.debug("Position of gz header: %s" % gzipOffset)
+		log.debug("Position of gz header: %s", gzipOffset)
 
 		if gzipOffset < 6:
-			log.error("invalid gzip header position: %s" % gzipOffset)
+			log.error("invalid gzip header position: %s", gzipOffset)
 			return False
 
 		self.file = BGLGzipFile(
@@ -427,7 +427,7 @@ class BglReader(object):
 
 		self.detectEncoding()
 
-		log.debug("numEntries = %s" % self.numEntries)
+		log.debug("numEntries = %s", self.numEntries)
 		if self.bgl_numEntries and self.bgl_numEntries != self.numEntries:
 			# There are a number of cases when these numbers do not match.
 			# The dictionary is OK, and these is no doubt that we might missed
@@ -474,7 +474,7 @@ class BglReader(object):
 			try:
 				glos.setInfo(key, value)
 			except:
-				log.exception("key = %s" % key)
+				log.exception("key = %s", key)
 
 	def isEndOfDictData(self):
 		"""
@@ -510,9 +510,7 @@ class BglReader(object):
 	def __del__(self):
 		self.close()
 		while unkownHtmlEntries:
-			log.debug(
-				"BGL: unknown html entity: %s" % unkownHtmlEntries.pop()
-			)
+			log.debug("BGL: unknown html entity: %s", unkownHtmlEntries.pop())
 
 	# returns False if error
 	def readBlock(self, block):
@@ -554,7 +552,7 @@ class BglReader(object):
 			return -1 if error
 		"""
 		if num < 1 or num > 4:
-			log.error("invalid argument num=%s" % num)
+			log.error("invalid argument num=%s", num)
 			return -1
 		self.file.flush()
 		buf = self.file.read(num)
@@ -623,7 +621,7 @@ class BglReader(object):
 		pos += Len
 		b_data = block.data[pos:]
 		# if b_name in (b"C2EEF3F6.html", b"8EAF66FD.bmp"):
-		#	log.debug("Skipping non-useful file %r" % b_name)
+		#	log.debug("Skipping non-useful file %r", b_name)
 		#	return
 		u_name = b_name.decode(self.sourceEncoding)
 		return self._glos.newDataEntry(
@@ -646,8 +644,9 @@ class BglReader(object):
 		except KeyError:
 			if b_value.strip(b"\x00"):
 				log.debug(
-					"Unknown info type code=%#.2x" % code +
-					", b_value=%r" % b_value,
+					"Unknown info type code=%#.2x, b_value=%r",
+					code,
+					b_value,
 				)
 			return
 

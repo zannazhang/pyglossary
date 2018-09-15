@@ -190,19 +190,19 @@ class DebugBglReader(BglReader):
 	def openGzip(self):
 		with open(self._filename, "rb") as bglFile:
 			if not bglFile:
-				log.error("file pointer empty: %s" % bglFile)
+				log.error("file pointer empty: %s", bglFile)
 				return False
 			buf = bglFile.read(6)
 			if len(buf) < 6 or not buf[:4] in (
 				b"\x12\x34\x00\x01",
 				b"\x12\x34\x00\x02",
 			):
-				log.error("invalid header: %s" % buf[:6])
+				log.error("invalid header: %s", buf[:6])
 				return False
 			self.gzipOffset = gzipOffset = binStrToInt(buf[4:6])
-			log.debug("Position of gz header: i=%s" % gzipOffset)
+			log.debug("Position of gz header: i=%s", gzipOffset)
 			if gzipOffset < 6:
-				log.error("invalid gzip header position: %s" % gzipOffset)
+				log.error("invalid gzip header position: %s", gzipOffset)
 				return False
 
 			if self.writeGz:
