@@ -2,10 +2,6 @@
 
 from time import time as now
 import re
-try:
-	from BeautifulSoup import BeautifulSoup
-except ImportError:
-	from bs4 import BeautifulSoup
 
 from formats_common import *
 
@@ -18,6 +14,20 @@ writeOptions = [
 	"encoding",  # str
 ]
 
+BeautifulSoup = None
+
+def loadBeautifulSoup():
+	global BeautifulSoup
+	try:
+		import bs4 as BeautifulSoup
+	except:
+		import BeautifulSoup
+	if int(BeautifulSoup.__version__.split(".")[0]) < 4:
+		raise ImportError(
+			"BeautifulSoup is too old, required at least version 4, " +
+			"%r found.\n" % BeautifulSoup.__version__ +
+			"Please run `sudo pip3 install lxml beautifulsoup4 html5lib`"
+		)
 
 class Reader(object):
 	specialPattern = re.compile(r".*~[^_]")
@@ -127,6 +137,8 @@ class Reader(object):
 		# return True
 
 	def parseArticle(self, word, fpath):
+		if BeautifulSoup is None:
+			loadBeautifulSoup()
 		try:
 			with open(fpath) as fileObj:
 				text = fileObj.read()

@@ -30,25 +30,6 @@ from pyglossary.plugins.formats_common import log, toStr
 
 log = logging.getLogger("root")
 
-
-
-def get_beautiful_soup():
-	try:
-		import bs4 as BeautifulSoup
-	except ImportError:
-		try:
-			import BeautifulSoup
-		except ImportError:
-			return None
-	if int(BeautifulSoup.__version__.split(".")[0]) < 4:
-		raise ImportError(
-			"BeautifulSoup is too old, required at least version 4, " +
-			"%r found.\n" % BeautifulSoup.__version__ +
-			"Please run `sudo pip3 install lxml beautifulsoup4 html5lib`"
-		)
-	return BeautifulSoup
-
-
 digs = string.digits + string.ascii_letters
 
 
