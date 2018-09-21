@@ -1,8 +1,8 @@
 import logging
-log = logging.getLogger('root')
+log = logging.getLogger("root")
 
 def toStr(s):
-	return str(s, 'utf8') if isinstance(s, bytes) else str(s)
+	return str(s, "utf8") if isinstance(s, bytes) else str(s)
 
 html_entity2str = {
 	"ldash": "–",
