@@ -2,19 +2,27 @@
 
 import re
 
+from typing import (
+	Optional,
+)
+
 from .text_utils import (
 	fixUtf8,
 )
+
+from .entry_base import BaseEntry
+from .glossary import Glossary
+
 
 
 class EntryFilter(object):
 	name = ''
 	desc = ''
 
-	def __init__(self, glos):
+	def __init__(self, glos: Glossary):
 		self.glos = glos
 
-	def run(self, entry):
+	def run(self, entry: BaseEntry) -> Optional[BaseEntry]:
 		"""
 			returns an Entry object, or None to skip
 				may return the same `entry`,
@@ -28,7 +36,7 @@ class StripEntryFilter(EntryFilter):
 	name = 'strip'
 	desc = 'Strip Whitespaces'
 
-	def run(self, entry):
+	def run(self, entry: BaseEntry) -> Optional[BaseEntry]:
 		entry.strip()
 		entry.replace('\r', '')
 		return entry
@@ -38,7 +46,7 @@ class NonEmptyWordFilter(EntryFilter):
 	name = 'non_empty_word'
 	desc = 'Non-empty Words'
 
-	def run(self, entry):
+	def run(self, entry: BaseEntry) -> Optional[BaseEntry]:
 		if not entry.getWord():
 			return
 #		words = entry.getWords()
@@ -54,7 +62,7 @@ class NonEmptyDefiFilter(EntryFilter):
 	name = 'non_empty_defi'
 	desc = 'Non-empty Definition'
 
-	def run(self, entry):
+	def run(self, entry: BaseEntry) -> Optional[BaseEntry]:
 		if not entry.getDefi():
 			return
 		return entry
@@ -64,7 +72,7 @@ class FixUnicodeFilter(EntryFilter):
 	name = 'fix_unicode'
 	desc = 'Fix Unicode'
 
-	def run(self, entry):
+	def run(self, entry: BaseEntry) -> Optional[BaseEntry]:
 		entry.editFuncWord(fixUtf8)
 		entry.editFuncDefi(fixUtf8)
 		return entry
@@ -74,7 +82,7 @@ class LowerWordFilter(EntryFilter):
 	name = 'lower_word'
 	desc = 'Lowercase Words'
 
-	def run(self, entry):
+	def run(self, entry: BaseEntry) -> Optional[BaseEntry]:
 		entry.editFuncWord(str.lower)
 		return entry
 
@@ -83,7 +91,7 @@ class SkipDataEntryFilter(EntryFilter):
 	name = 'skip_resources'
 	desc = 'Skip Resources'
 
-	def run(self, entry):
+	def run(self, entry: BaseEntry) -> Optional[BaseEntry]:
 		if entry.isData():
 			return
 		return entry
@@ -93,7 +101,7 @@ class LangEntryFilter(EntryFilter):
 	name = 'lang'
 	desc = 'Language-dependent Filters'
 
-	def run_fa(self, entry):
+	def run_fa(self, entry: BaseEntry) -> Optional[BaseEntry]:
 		from pyglossary.persian_utils import faEditStr
 		entry.editFuncWord(faEditStr)
 		entry.editFuncDefi(faEditStr)
@@ -102,7 +110,7 @@ class LangEntryFilter(EntryFilter):
 		# for GoldenDict ^^ FIXME
 		return entry
 
-	def run(self, entry):
+	def run(self, entry: BaseEntry) -> Optional[BaseEntry]:
 		langs = (
 			self.glos.getInfo('sourceLang') +
 			self.glos.getInfo('targetLang')
@@ -117,7 +125,7 @@ class CleanEntryFilter(EntryFilter):  # FIXME
 	name = 'clean'
 	desc = 'Clean'
 
-	def cleanDefi(self, st):
+	def cleanDefi(self, st: str) -> str:
 		st = st.replace('♦  ', '♦ ')
 		st = re.sub('[\r\n]+', '\n', st)
 		st = re.sub(' *\n *', '\n', st)
@@ -146,6 +154,6 @@ class CleanEntryFilter(EntryFilter):  # FIXME
 
 		return st
 
-	def run(self, entry):
+	def run(self, entry: BaseEntry) -> Optional[BaseEntry]:
 		entry.editFuncDefi(self.cleanDefi)
 		return entry
