@@ -286,25 +286,26 @@ class Glossary(object):
 		self.ui = ui
 
 	def updateEntryFilters(self) -> None:
+		from . import entry_filters as ef
 		self._entryFilters = []
 		pref = getattr(self.ui, "pref", {})
 
-		self._entryFilters.append(StripEntryFilter(self))
-		self._entryFilters.append(NonEmptyWordFilter(self))
+		self._entryFilters.append(ef.StripEntryFilter(self))
+		self._entryFilters.append(ef.NonEmptyWordFilter(self))
 
 		if pref.get("skipResources", False):
-			self._entryFilters.append(SkipDataEntryFilter(self))
+			self._entryFilters.append(ef.SkipDataEntryFilter(self))
 
 		if pref.get("utf8Check", True):
-			self._entryFilters.append(FixUnicodeFilter(self))
+			self._entryFilters.append(ef.FixUnicodeFilter(self))
 
 		if pref.get("lower", True):
-			self._entryFilters.append(LowerWordFilter(self))
+			self._entryFilters.append(ef.LowerWordFilter(self))
 
-		self._entryFilters.append(LangEntryFilter(self))
-		self._entryFilters.append(CleanEntryFilter(self))
-		self._entryFilters.append(NonEmptyWordFilter(self))
-		self._entryFilters.append(NonEmptyDefiFilter(self))
+		self._entryFilters.append(ef.LangEntryFilter(self))
+		self._entryFilters.append(ef.CleanEntryFilter(self))
+		self._entryFilters.append(ef.NonEmptyWordFilter(self))
+		self._entryFilters.append(ef.NonEmptyDefiFilter(self))
 
 	def __str__(self) -> str:
 		return "glossary.Glossary"
