@@ -21,6 +21,7 @@
 # If not, see <http://www.gnu.org/licenses/gpl.txt>.
 
 from .bgl_reader import BglReader
+from pyglossary.text_utils import toStr, isASCII
 
 
 class MetaData(object):
@@ -317,7 +318,7 @@ class DebugBglReader(BglReader):
 			)
 			if self.metadata2:
 				self.metadata2.defiProcessedCount += 1
-				if isASCII(fields.b_defi):
+				if isASCII(toStr(fields.b_defi)):
 					self.metadata2.defiAsciiCount += 1
 				try:
 					fields.b_defi.decode("utf8")

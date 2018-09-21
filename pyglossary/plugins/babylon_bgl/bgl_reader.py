@@ -42,7 +42,6 @@ except ImportError:
 from pyglossary.text_utils import (
 	binStrToInt,
 	excMessage,
-	isASCII,
 )
 
 from pyglossary.xml_utils import xml_escape
