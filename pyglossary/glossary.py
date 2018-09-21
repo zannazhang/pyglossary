@@ -58,8 +58,8 @@ from typing import (
 from .flags import *
 from . import core
 from .core import VERSION, userPluginsDir
-from .entry import BaseEntry, Entry, DataEntry
-from .entry_filters import *
+from .entry_base import BaseEntry
+from .entry import Entry, DataEntry
 from .sort_stream import hsortStreamList
 
 from .text_utils import (
