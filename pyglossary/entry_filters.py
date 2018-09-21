@@ -16,8 +16,8 @@ from .glossary import Glossary
 
 
 class EntryFilter(object):
-	name = ''
-	desc = ''
+	name = ""
+	desc = ""
 
 	def __init__(self, glos: Glossary):
 		self.glos = glos
@@ -33,18 +33,18 @@ class EntryFilter(object):
 
 
 class StripEntryFilter(EntryFilter):
-	name = 'strip'
-	desc = 'Strip Whitespaces'
+	name = "strip"
+	desc = "Strip Whitespaces"
 
 	def run(self, entry: BaseEntry) -> Optional[BaseEntry]:
 		entry.strip()
-		entry.replace('\r', '')
+		entry.replace("\r", "")
 		return entry
 
 
 class NonEmptyWordFilter(EntryFilter):
-	name = 'non_empty_word'
-	desc = 'Non-empty Words'
+	name = "non_empty_word"
+	desc = "Non-empty Words"
 
 	def run(self, entry: BaseEntry) -> Optional[BaseEntry]:
 		if not entry.getWord():
@@ -52,15 +52,15 @@ class NonEmptyWordFilter(EntryFilter):
 #		words = entry.getWords()
 #		if not words:
 #			return
-#		wordsStr = ''.join([w.strip() for w in words])
+#		wordsStr = "".join([w.strip() for w in words])
 #		if not wordsStr:
 #			return
 		return entry
 
 
 class NonEmptyDefiFilter(EntryFilter):
-	name = 'non_empty_defi'
-	desc = 'Non-empty Definition'
+	name = "non_empty_defi"
+	desc = "Non-empty Definition"
 
 	def run(self, entry: BaseEntry) -> Optional[BaseEntry]:
 		if not entry.getDefi():
@@ -69,8 +69,8 @@ class NonEmptyDefiFilter(EntryFilter):
 
 
 class FixUnicodeFilter(EntryFilter):
-	name = 'fix_unicode'
-	desc = 'Fix Unicode'
+	name = "fix_unicode"
+	desc = "Fix Unicode"
 
 	def run(self, entry: BaseEntry) -> Optional[BaseEntry]:
 		entry.editFuncWord(fixUtf8)
@@ -79,8 +79,8 @@ class FixUnicodeFilter(EntryFilter):
 
 
 class LowerWordFilter(EntryFilter):
-	name = 'lower_word'
-	desc = 'Lowercase Words'
+	name = "lower_word"
+	desc = "Lowercase Words"
 
 	def run(self, entry: BaseEntry) -> Optional[BaseEntry]:
 		entry.editFuncWord(str.lower)
@@ -88,8 +88,8 @@ class LowerWordFilter(EntryFilter):
 
 
 class SkipDataEntryFilter(EntryFilter):
-	name = 'skip_resources'
-	desc = 'Skip Resources'
+	name = "skip_resources"
+	desc = "Skip Resources"
 
 	def run(self, entry: BaseEntry) -> Optional[BaseEntry]:
 		if entry.isData():
@@ -98,58 +98,58 @@ class SkipDataEntryFilter(EntryFilter):
 
 
 class LangEntryFilter(EntryFilter):
-	name = 'lang'
-	desc = 'Language-dependent Filters'
+	name = "lang"
+	desc = "Language-dependent Filters"
 
 	def run_fa(self, entry: BaseEntry) -> Optional[BaseEntry]:
 		from pyglossary.persian_utils import faEditStr
 		entry.editFuncWord(faEditStr)
 		entry.editFuncDefi(faEditStr)
-		# RLM = '\xe2\x80\x8f'
-		# defi = '\n'.join([RLM+line for line in defi.split('\n')])
+		# RLM = "\xe2\x80\x8f"
+		# defi = "\n".join([RLM+line for line in defi.split("\n")])
 		# for GoldenDict ^^ FIXME
 		return entry
 
 	def run(self, entry: BaseEntry) -> Optional[BaseEntry]:
 		langs = (
-			self.glos.getInfo('sourceLang') +
-			self.glos.getInfo('targetLang')
+			self.glos.getInfo("sourceLang") +
+			self.glos.getInfo("targetLang")
 		).lower()
-		if 'persian' in langs or 'farsi' in langs:
+		if "persian" in langs or "farsi" in langs:
 			entry = self.run_fa(entry)
 
 		return entry
 
 
 class CleanEntryFilter(EntryFilter):  # FIXME
-	name = 'clean'
-	desc = 'Clean'
+	name = "clean"
+	desc = "Clean"
 
 	def cleanDefi(self, st: str) -> str:
-		st = st.replace('♦  ', '♦ ')
-		st = re.sub('[\r\n]+', '\n', st)
-		st = re.sub(' *\n *', '\n', st)
+		st = st.replace("♦  ", "♦ ")
+		st = re.sub("[\r\n]+", "\n", st)
+		st = re.sub(" *\n *", "\n", st)
 
 		"""
 		This code may correct snippets like:
 		- First sentence .Second sentence. -> First sentence. Second sentence.
 		- First clause ,second clause. -> First clause, second clause.
 		But there are cases when this code have undesirable effects
-		( '<' represented as '&lt;' in HTML markup):
+		( "<" represented as "&lt;" in HTML markup):
 		- <Adj.> -> < Adj. >
 		- <fig.> -> < fig. >
 		"""
 		"""
 		for j in range(3):
-			for ch in ',.;':
+			for ch in ",.;":
 				st = replacePostSpaceChar(st, ch)
 		"""
 
-		st = re.sub('♦\n+♦', '♦', st)
-		if st.endswith('<p'):
+		st = re.sub("♦\n+♦", "♦", st)
+		if st.endswith("<p"):
 			st = st[:-2]
 		st = st.strip()
-		if st.endswith(','):
+		if st.endswith(","):
 			st = st[:-1]
 
 		return st
