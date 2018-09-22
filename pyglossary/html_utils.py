@@ -1,7 +1,9 @@
+from typing import AnyStr
+
 import logging
 log = logging.getLogger("root")
 
-def toStr(s):
+def toStr(s: AnyStr) -> str:
 	return str(s, "utf8") if isinstance(s, bytes) else str(s)
 
 html_entity2str = {
