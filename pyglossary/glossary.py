@@ -80,7 +80,7 @@ except NameError:
 	ModuleNotFoundError = ImportError
 
 
-def get_ext(path):
+def get_ext(path: str) -> str:
 	return splitext(path)[1].lower()
 
 
@@ -231,7 +231,7 @@ class Glossary(GlossaryType):
 
 		return plugin
 
-	def clear(self):
+	def clear(self) -> None:
 		self._info = odict()
 
 		self._data = []
@@ -426,7 +426,7 @@ class Glossary(GlossaryType):
 			for entry in self
 		]).most_common(count)
 
-	# def formatInfoKeys(self, format):# FIXME
+	# def formatInfoKeys(self, format: str):# FIXME
 
 	def iterInfo(self) -> Iterator[Tuple[str, str]]:
 		return self._info.items()
@@ -498,7 +498,7 @@ class Glossary(GlossaryType):
 		direct: bool = False,
 		progressbar: bool = True,
 		**options
-	):
+	) -> bool:
 		"""
 		filename (str): name/path of input file
 		format (str): name of input format,
@@ -779,7 +779,7 @@ class Glossary(GlossaryType):
 		sortKey: Optional[Callable[[str], Any]] = None,
 		sortCacheSize: int = 1000,
 		**options
-	):
+	) -> Optional[str]:
 		"""
 		sort (bool):
 			True (enable sorting),
@@ -875,7 +875,7 @@ class Glossary(GlossaryType):
 
 		return filename
 
-	def archiveOutDir(self, filename: str, archiveType: str):
+	def archiveOutDir(self, filename: str, archiveType: str) -> str:
 		"""
 		filename is the existing file path
 		archiveType is the archive extention (without dot): "gz", "bz2", "zip"
@@ -935,7 +935,7 @@ class Glossary(GlossaryType):
 		sortCacheSize: int = 1000,
 		readOptions: Optional[Dict[str, Any]] = None,
 		writeOptions: Optional[Dict[str, Any]] = None,
-	):
+	) -> Optional[str]:
 		"""
 		returns absolute path of output file, or None if failed
 		"""
