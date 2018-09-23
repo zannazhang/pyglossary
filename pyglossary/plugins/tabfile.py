@@ -55,7 +55,7 @@ class Reader(TextGlossaryReader):
 
 
 def write(
-	glos: Any, # FIXME: can not import Glossary here
+	glos: GlossaryType,
 	filename: str,
 	encoding: str = "utf-8",
 	writeInfo: bool = True,

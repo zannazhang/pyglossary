@@ -36,7 +36,7 @@ from pyglossary.text_utils import toStr, toBytes
 from pyglossary.os_utils import indir
 from pyglossary.entry_base import BaseEntry
 
-from pyglossary.glossary import Glossary
+from pyglossary.glossary import Glossary as GlossaryType
 
 enable = False
 format = "Unknown"
