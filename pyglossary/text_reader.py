@@ -1,7 +1,8 @@
 from pyglossary.file_utils import fileCountLines
 from pyglossary.entry_base import BaseEntry
 from pyglossary.entry import Entry
-from pyglossary.glossary import Glossary
+
+from pyglossary.glossary import Glossary as GlossaryType
 
 
 from typing import (
@@ -14,7 +15,7 @@ log = logging.getLogger("root")
 
 
 class TextGlossaryReader(object):
-	def __init__(self, glos: Glossary, hasInfo: bool = True):
+	def __init__(self, glos: GlossaryType, hasInfo: bool = True):
 		self._glos = glos
 		self._filename = ""
 		self._file = None
