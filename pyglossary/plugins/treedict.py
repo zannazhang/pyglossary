@@ -13,7 +13,13 @@ writeOptions = [
 ]
 
 
-def write(glos, filename, encoding="utf-8", archive="tar.bz2", sep=os.sep):
+def write(
+	glos: GlossaryType,
+	filename: str,
+	encoding: str = "utf-8",
+	archiv: str = "tar.bz2",
+	sep: str = os.sep,
+) -> None:
 	if os.path.exists(filename):
 		if os.path.isdir(filename):
 			if os.listdir(filename):
