@@ -67,6 +67,8 @@ from .text_utils import (
 )
 from .os_utils import indir
 
+from .glossary_type import GlossaryType
+
 homePage = "https://github.com/ilius/pyglossary"
 log = logging.getLogger("root")
 
@@ -82,7 +84,7 @@ def get_ext(path):
 	return splitext(path)[1].lower()
 
 
-class Glossary(object):
+class Glossary(GlossaryType):
 	"""
 	Direct access to glos.data is droped
 	Use `glos.addEntry(word, defi, [defiFormat])`
