@@ -4,6 +4,7 @@ from pyglossary.entry import Entry
 
 from pyglossary.glossary_type import GlossaryType
 
+from pyglossary.reader_base import BaseReader
 
 from typing import (
 	Tuple,
@@ -14,8 +15,8 @@ import logging
 log = logging.getLogger("root")
 
 
-class TextGlossaryReader(object):
-	def __init__(self, glos: GlossaryType, hasInfo: bool = True):
+class TextGlossaryReader(BaseReader):
+	def __init__(self, glos: GlossaryType, hasInfo: bool = True) -> None:
 		self._glos = glos
 		self._filename = ""
 		self._file = None

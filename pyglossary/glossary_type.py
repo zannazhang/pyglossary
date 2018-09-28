@@ -5,7 +5,9 @@ from typing import (
 	Tuple,
 	List,
 	Optional,
+	Any,
 	Iterator,
+	ItemsView,
 	Callable,
 )
 
@@ -15,7 +17,7 @@ from .entry_base import BaseEntry
 from .entry import Entry, DataEntry
 
 class GlossaryType(object):
-	def addEntryObj(self, entry: Entry) -> None:
+	def addEntryObj(self, entry: BaseEntry) -> None:
 		raise NotImplementedError
 
 	def newEntry(self, word: str, defi: str, defiFormat: str = "") -> Entry:
@@ -24,7 +26,7 @@ class GlossaryType(object):
 	def addEntry(self, word: str, defi: str, defiFormat: str = "") -> None:
 		raise NotImplementedError
 
-	def iterEntryBuckets(self, size: int) -> Iterator[BaseEntry]:
+	def iterEntryBuckets(self, size: int) -> Iterator[List[BaseEntry]]:
 		raise NotImplementedError
 
 	def setDefaultDefiFormat(self, defiFormat: str) -> None:
@@ -33,7 +35,7 @@ class GlossaryType(object):
 	def getMostUsedDefiFormats(self, count: int = None) -> List[Tuple[str, int]]:
 		raise NotImplementedError
 
-	def iterInfo(self) -> Iterator[Tuple[str, str]]:
+	def iterInfo(self) -> ItemsView[str, Any]:
 		raise NotImplementedError
 
 	def getInfo(self, key: str) -> str:
@@ -42,7 +44,7 @@ class GlossaryType(object):
 	def setInfo(self, key: str, value: str) -> None:
 		raise NotImplementedError
 
-	def getExtraInfos(self, excludeKeys: List[str]) -> odict:
+	def getExtraInfos(self, excludeKeys: List[str]) -> Dict[str, Any]:
 		raise NotImplementedError
 
 	def getPref(self, name: str, default: Optional[str]) -> Optional[str]:

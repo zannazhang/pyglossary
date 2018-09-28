@@ -36,7 +36,7 @@ writeOptions = [
 supportsAlternates = True
 
 
-class Reader(object):
+class Reader(BaseReader):
 	def __init__(self, glos: GlossaryType):
 		self._glos = glos
 		self.clear()

@@ -25,9 +25,11 @@ import argparse
 import builtins
 from os.path import dirname, join, realpath
 from pprint import pformat
-import logging
 
-from pyglossary import core  # essential
+from pyglossary import logger # essential
+from pyglossary.logger import log
+
+from pyglossary import core  # essential yet?
 from pyglossary import VERSION
 from pyglossary.text_utils import startRed, endFormat
 
@@ -211,11 +213,11 @@ parser.add_argument(
 
 args = parser.parse_args()
 
-log = logging.getLogger('root')
-log.setVerbosity(args.verbosity)
+logger.setVerbosity(args.verbosity)
 log.addHandler(
-	core.StdLogHandler(noColor=args.noColor),
+	logger.StdLogHandler(noColor=args.noColor),
 )
+logger.overrideExceptHook() # only after StdLogHandler is added
 # with the logger setted up, we can import other pyglossary modules, so they
 # can do some loggging in right way.
 
@@ -299,10 +301,10 @@ for param in convertOptionsKeys:
 	if value is not None:
 		convertOptions[param] = value
 
-log.pretty(prefOptions, 'prefOptions = ')
-log.pretty(readOptions, 'readOptions = ')
-log.pretty(writeOptions, 'writeOptions = ')
-log.pretty(convertOptions, 'convertOptions = ')
+log.debug("prefOptions = " + pformat(prefOptions))
+log.debug("readOptions = " + pformat(readOptions))
+log.debug("writeOptions = " + pformat(writeOptions))
+log.debug("convertOptions = " + pformat(convertOptions))
 
 """
 ui_type: User interface type

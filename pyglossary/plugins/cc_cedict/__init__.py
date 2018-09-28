@@ -1,5 +1,5 @@
 import re
-from formats_common import log
+from formats_common import *
 from . import conv
 
 enable = True
@@ -8,7 +8,8 @@ format = "CC-CEDICT"
 extentions = (".u8",)
 
 entry_count_reg = re.compile(r"#! entries=(\d+)")
-class Reader:
+
+class Reader(BaseReader):
 	def __init__(self, glos):
 		self._glos = glos
 		self.file = None

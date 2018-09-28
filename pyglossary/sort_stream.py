@@ -6,12 +6,12 @@ from heapq import merge
 from typing import (
 	TypeVar,
 	#Dict,
-	#Tuple,
+	Tuple,
 	List,
 	Sequence,
 	Any,
 	Optional,
-	Iterator,
+	Iterable,
 	Callable,
 )
 
@@ -22,7 +22,7 @@ log = logging.getLogger("root")
 
 T = TypeVar("T")
 
-def hsortStream(stream: Iterator[T], maxHeapSize: int, key: Optional[Callable[[T], Any]] = None) -> Iterator[T]:
+def hsortStream(stream: Iterable[T], maxHeapSize: int, key: Optional[Callable[[T], Any]] = None) -> Iterable[T]:
 	"""
 		stream: a generator or iterable
 		maxHeapSize: int, maximum size of heap
@@ -32,31 +32,33 @@ def hsortStream(stream: Iterator[T], maxHeapSize: int, key: Optional[Callable[[T
 		the sort is Stable (unlike normal heapsort) because we include the
 			index (after item / output of key function)
 	"""
-	hp = []
 	if key:
+		hp3 = [] # type: List[Tuple[Any, int, T]]
 		for index, item in enumerate(stream):
-			if len(hp) >= maxHeapSize:
-				yield heappop(hp)[2]
-			heappush(hp, (
+			if len(hp3) >= maxHeapSize:
+				yield heappop(hp3)[2]
+			heappush(hp3, (
 				key(item),  # for sorting order
 				index,  # for sort being Stable
 				item,  # for fetching result
 			))
-		while hp:
-			yield heappop(hp)[2]
+		while hp3:
+			yield heappop(hp3)[2]
 	else:  # consume less memory
+		hp2 = [] # type: List[Tuple[T, int]]
 		for index, item in enumerate(stream):
-			if len(hp) >= maxHeapSize:
-				yield heappop(hp)[0]
-			heappush(hp, (
+			if len(hp2) >= maxHeapSize:
+				val = heappop(hp2)[0] # type: T
+				yield val
+			heappush(hp2, (
 				item,  # for sorting order, and fetching result
 				index,  # for sort being Stable
 			))
-		while hp:
-			yield heappop(hp)[0]
+		while hp2:
+			yield heappop(hp2)[0]
 
 
-def hsortStreamList(streams: Sequence[Iterator[T]], *args, **kwargs) -> Iterator[T]:
+def hsortStreamList(streams: Sequence[Iterable[T]], *args, **kwargs) -> Iterable[T]:
 	streams = [
 		 hsortStream(stream, *args, **kwargs)
 		 for stream in streams

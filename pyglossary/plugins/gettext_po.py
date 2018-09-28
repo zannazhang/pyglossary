@@ -12,7 +12,7 @@ writeOptions = [
 ]
 
 
-class Reader(object):
+class Reader(BaseReader):
 	def __init__(self, glos, hasInfo=True):
 		self._glos = glos
 		self.clear()

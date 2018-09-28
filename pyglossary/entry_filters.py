@@ -11,25 +11,8 @@ from .text_utils import (
 )
 
 from .entry_base import BaseEntry
+from .entry_filters_base import EntryFilter
 from .glossary import Glossary
-
-
-
-class EntryFilter(object):
-	name = ""
-	desc = ""
-
-	def __init__(self, glos: Glossary):
-		self.glos = glos
-
-	def run(self, entry: BaseEntry) -> Optional[BaseEntry]:
-		"""
-			returns an Entry object, or None to skip
-				may return the same `entry`,
-				or modify and return it,
-				or return a new Entry object
-		"""
-		return entry
 
 
 class StripEntryFilter(EntryFilter):
@@ -48,13 +31,13 @@ class NonEmptyWordFilter(EntryFilter):
 
 	def run(self, entry: BaseEntry) -> Optional[BaseEntry]:
 		if not entry.getWord():
-			return
+			return None
 #		words = entry.getWords()
 #		if not words:
-#			return
+#			return None
 #		wordsStr = "".join([w.strip() for w in words])
 #		if not wordsStr:
-#			return
+#			return None
 		return entry
 
 
@@ -64,7 +47,7 @@ class NonEmptyDefiFilter(EntryFilter):
 
 	def run(self, entry: BaseEntry) -> Optional[BaseEntry]:
 		if not entry.getDefi():
-			return
+			return None
 		return entry
 
 
@@ -93,7 +76,7 @@ class SkipDataEntryFilter(EntryFilter):
 
 	def run(self, entry: BaseEntry) -> Optional[BaseEntry]:
 		if entry.isData():
-			return
+			return None
 		return entry
 
 
@@ -116,7 +99,7 @@ class LangEntryFilter(EntryFilter):
 			self.glos.getInfo("targetLang")
 		).lower()
 		if "persian" in langs or "farsi" in langs:
-			entry = self.run_fa(entry)
+			return self.run_fa(entry)
 
 		return entry
 

@@ -30,8 +30,6 @@ from typing.re import Pattern
 from . import _normalize
 from pyglossary.plugins.formats_common import *
 
-log = logging.getLogger("root")
-
 digs = string.digits + string.ascii_letters
 
 

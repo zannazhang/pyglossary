@@ -23,6 +23,7 @@ import re
 import logging
 
 from typing import (
+	Any,
 	AnyStr,
 	List,
 	Union,
@@ -37,11 +38,13 @@ startRed = "\x1b[31m"
 endFormat = "\x1b[0;0;0m"  # len=8
 
 
-def toBytes(s: AnyStr) -> bytes:
+# Could not easily avoid Any type
+def toBytes(s: Any) -> bytes:
 	return bytes(s, "utf8") if isinstance(s, str) else bytes(s)
 
 
-def toStr(s: AnyStr) -> str:
+# Could not easily avoid Any type
+def toStr(s: Any) -> str:
 	return str(s, "utf8") if isinstance(s, bytes) else str(s)
 
 
@@ -94,7 +97,13 @@ def splitByBarUnescapeNTB(st: str) -> List[str]:
 # return a message string describing the current exception
 def excMessage() -> str:
 	i = sys.exc_info()
-	return "{0}: {1}".format(i[0].__name__, i[1])
+	msg = ""
+	if i[0] is not None:
+		#type_ = i[0] # type: Type[BaseException]
+		msg = i[0].__name__ + ": "
+	if i[1] is not None:
+		msg += str(i[1])
+	return msg
 
 
 def formatHMS(h: int, m: int, s: int) -> str:
@@ -123,15 +132,15 @@ def relTimeHMS(seconds: Union[int, float]) -> str:
 
 
 def intToBinStr(n: int, stLen: int = 0) -> bytes:
-	bs = []
+	bs = [] # type: List[int]
 	while n > 0:
 		bs.insert(0, n & 0xff)
 		n >>= 8
 	return bytes(bs).rjust(stLen, b"\x00")
 
 
-def binStrToInt(bs: AnyStr) -> int:
-	bs = toBytes(bs)
+def binStrToInt(bsArg: AnyStr) -> int:
+	bs = toBytes(bsArg)
 	n = 0
 	for c in bs:
 		n = (n << 8) + c
@@ -172,7 +181,7 @@ def runDictzip(filename: str) -> None:
 	import subprocess
 	dictzipCmd = "/usr/bin/dictzip"  # Save in pref FIXME
 	if not os.path.isfile(dictzipCmd):
-		return False
+		return
 	if filename[-4:] == ".ifo":
 		filename = filename[:-4]
 	(out, err) = subprocess.Popen(

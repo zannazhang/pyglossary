@@ -236,7 +236,7 @@ class DefinitionFields(object):
 		self.b_field_13 = None  # bytes
 
 
-class BglReader(object):
+class BglReader(BaseReader):
 
 	##########################################################################
 	"""

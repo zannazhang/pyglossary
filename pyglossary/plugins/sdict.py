@@ -125,7 +125,7 @@ class Header(object):
 		self.full_index_offset = read_int(st, self.f_full_index)
 
 
-class Reader(object):
+class Reader(BaseReader):
 	def __init__(self, glos):
 		self._glos = glos
 		self.clear()

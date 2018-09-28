@@ -1,8 +1,5 @@
 import sys
-try:
-	import json
-except ImportError:
-	import simplejson as json
+import json
 
 from collections import OrderedDict
 
@@ -12,6 +9,7 @@ from typing import (
 	List,
 	AnyStr,
 	Optional,
+	Any,
 )
 from types import ModuleType
 
@@ -88,7 +86,7 @@ def saveJsonConf(module: Union[ModuleType, str], confPath: str, params: str, enc
 	if isinstance(module, str):
 		module = sys.modules[module]
 	###
-	data = OrderedDict()
+	data = OrderedDict() # type: Dict[str, Any]
 	for param in params:
 		value = getattr(module, param)
 		if encoders:
@@ -105,7 +103,7 @@ def saveJsonConf(module: Union[ModuleType, str], confPath: str, params: str, enc
 		return
 
 
-def loadModuleJsonConf(module: Union[ModuleType, str]) -> None:
+def loadModuleJsonConf(module: Any) -> None:
 	if isinstance(module, str):
 		module = sys.modules[module]
 	###
@@ -130,7 +128,7 @@ def loadModuleJsonConf(module: Union[ModuleType, str]) -> None:
 	# should use module.confParams to restrict json keys? FIXME
 
 
-def saveModuleJsonConf(module: Union[ModuleType, str]) -> None:
+def saveModuleJsonConf(module: Any) -> None:
 	if isinstance(module, str):
 		module = sys.modules[module]
 	###

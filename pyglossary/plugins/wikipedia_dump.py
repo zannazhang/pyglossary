@@ -29,7 +29,7 @@ def loadBeautifulSoup():
 			"Please run `sudo pip3 install lxml beautifulsoup4 html5lib`"
 		)
 
-class Reader(object):
+class Reader(BaseReader):
 	specialPattern = re.compile(r".*~[^_]")
 	def __init__(self, glos):
 		self._glos = glos

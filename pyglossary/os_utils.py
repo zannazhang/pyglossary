@@ -14,7 +14,7 @@ class indir(object):
 		>>> print(os.getcwd())  # -> "~/projects"
 		>>> # automatically return to previous directory.
 	"""
-	def __init__(self, directory: str, create: bool = False, clear: bool = False):
+	def __init__(self, directory: str, create: bool = False, clear: bool = False) -> None:
 		self.oldpwd = None
 		self.dir = directory
 		self.create = create

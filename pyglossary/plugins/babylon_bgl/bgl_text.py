@@ -21,6 +21,8 @@
 # If not, see <http://www.gnu.org/licenses/gpl.txt>.
 
 import re
+import logging
+
 from pyglossary.plugins.formats_common import log
 from pyglossary.xml_utils import xml_escape
 
@@ -45,7 +47,7 @@ def replaceHtmlEntryNoEscapeCB(u_match):
 
 	u_text = u_match.group(0)
 	u_name = u_match.group(1)
-	if log.isDebug():
+	if log.level >= logging.DEBUG:
 		assert isinstance(u_text, str) and isinstance(u_name, str)
 
 	u_res = None
@@ -129,7 +131,7 @@ def replaceHtmlEntries(u_text):
 	# &ldash;
 	# &#0147;
 	# &#x010b;
-	if log.isDebug():
+	if log.level >= logging.DEBUG:
 		assert isinstance(u_text, str)
 	return re.sub(
 		u_pat_html_entry,
@@ -142,7 +144,7 @@ def replaceHtmlEntriesInKeys(u_text):
 	# &ldash;
 	# &#0147;
 	# &#x010b;
-	if log.isDebug():
+	if log.level >= logging.DEBUG:
 		assert isinstance(u_text, str)
 	return re.sub(
 		u_pat_html_entry_key,
@@ -157,7 +159,7 @@ def escapeNewlines(u_text):
 	\ -> \\
 	new line -> \n or \r
 	"""
-	if log.isDebug():
+	if log.level >= logging.DEBUG:
 		assert isinstance(u_text, str)
 	return re.sub(
 		"[\\r\\n\\\\]",
@@ -167,7 +169,7 @@ def escapeNewlines(u_text):
 
 
 def stripHtmlTags(u_text):
-	if log.isDebug():
+	if log.level >= logging.DEBUG:
 		assert isinstance(text, str)
 	return re.sub(
 		"(?:<[/a-zA-Z].*?(?:>|$))+",
@@ -181,7 +183,7 @@ def removeControlChars(u_text):
 	# \x0a - line feed
 	# \x0b - vertical tab
 	# \x0d - carriage return
-	if log.isDebug():
+	if log.level >= logging.DEBUG:
 		assert isinstance(u_text, str)
 	return re.sub(
 		"[\x00-\x08\x0c\x0e-\x1f]",
@@ -191,7 +193,7 @@ def removeControlChars(u_text):
 
 
 def removeNewlines(u_text):
-	if log.isDebug():
+	if log.level >= logging.DEBUG:
 		assert isinstance(u_text, str)
 	return re.sub(
 		"[\r\n]+",
@@ -204,7 +206,7 @@ def normalizeNewlines(u_text):
 	"""
 	convert new lines to unix style and remove consecutive new lines
 	"""
-	if log.isDebug():
+	if log.level >= logging.DEBUG:
 		assert isinstance(u_text, str)
 	return re.sub(
 		"[\r\n]+",
@@ -216,7 +218,7 @@ def normalizeNewlines(u_text):
 def replaceAsciiCharRefs(b_text, encoding):
 	# &#0147;
 	# &#x010b;
-	if log.isDebug():
+	if log.level >= logging.DEBUG:
 		assert isinstance(b_text, bytes)
 	b_parts = re.split(b_pat_ascii_char_ref, b_text)
 	for i_part, b_part in enumerate(b_parts):
@@ -253,13 +255,13 @@ def fixImgLinks(u_text):
 	Control characters \x1e and \x1f are useless in html text, so we may
 	safely remove all of them, irrespective of context.
 	"""
-	if log.isDebug():
+	if log.level >= logging.DEBUG:
 		assert isinstance(u_text, str)
 	return u_text.replace("\x1e", "").replace("\x1f", "")
 
 
 def stripDollarIndexes(b_word):
-	if log.isDebug():
+	if log.level >= logging.DEBUG:
 		assert isinstance(b_word, bytes)
 	i = 0
 	b_word_main = b""

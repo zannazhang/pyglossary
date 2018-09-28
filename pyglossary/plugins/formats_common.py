@@ -1,5 +1,3 @@
-from formats_common import *
-
 import sys
 import os
 from os.path import (
@@ -37,6 +35,7 @@ from pyglossary.os_utils import indir
 from pyglossary.entry_base import BaseEntry
 
 from pyglossary.glossary_type import GlossaryType
+from pyglossary.reader_base import BaseReader
 
 enable = False
 format = "Unknown"
@@ -47,3 +46,4 @@ writeOptions = []
 supportsAlternates = False
 sortOnWrite = DEFAULT_NO
 sortKey = None
+

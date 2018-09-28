@@ -18,8 +18,6 @@
 # with this program. Or on Debian systems, from /usr/share/common-licenses/GPL
 # If not, see <http://www.gnu.org/licenses/gpl.txt>.
 
-import logging
-
 import sys
 
 import os
@@ -43,23 +41,29 @@ from collections import Counter
 from collections import OrderedDict as odict
 
 import io
+from pprint import pformat
 
 from typing import (
 	Dict,
 	Tuple,
 	List,
+	Sequence,
 	Any,
 	Optional,
-	ClassVar,
+	Union,
 	Iterator,
+	Iterable,
+	ItemsView,
 	Callable,
 )
 
+from .logger import log
 from .flags import *
 from . import core
 from .core import VERSION, userPluginsDir
 from .entry_base import BaseEntry
 from .entry import Entry, DataEntry
+from .entry_filters_base import EntryFilter
 from .sort_stream import hsortStreamList
 
 from .text_utils import (
@@ -69,13 +73,14 @@ from .os_utils import indir
 
 from .glossary_type import GlossaryType
 
+from .reader_base import BaseReader
+
 homePage = "https://github.com/ilius/pyglossary"
-log = logging.getLogger("root")
 
 file = io.BufferedReader
 
 try:
-	ModuleNotFoundError
+	eval("ModuleNotFoundError") # using eval just for mypy
 except NameError:
 	ModuleNotFoundError = ImportError
 
@@ -112,26 +117,26 @@ class Glossary(GlossaryType):
 		##
 		"license": "copyright",
 	}
-	plugins = {}  # format => pluginModule
-	readFormats = []
-	writeFormats = []
-	readFunctions = {}
-	readerClasses = {}
-	writeFunctions = {}
-	formatsDesc = {}
-	formatsExt = {}
-	formatsReadOptions = {}
-	formatsWriteOptions = {}
-	readExt = []
-	writeExt = []
-	readDesc = []
-	writeDesc = []
-	descFormat = {}
-	descExt = {}
-	extFormat = {}
+	plugins = {} # type: Dict[str, Any] # format => pluginModule
+	readFormats = [] # type: List[str]
+	writeFormats = [] # type: List[str]
+	readFunctions = {} # type: Dict[str, Callable]
+	readerClasses = {} # type: Dict[str, BaseReader]
+	writeFunctions = {} # type: Dict[str, Callable]
+	formatsDesc = {} # type: Dict[str, str]
+	formatsExt = {} # type: Dict[str, str]
+	formatsReadOptions = {} # type: Dict[str, Any]
+	formatsWriteOptions = {} # type: Dict[str, Any]
+	readExt = [] # type: List[str]
+	writeExt = [] # type: List[str]
+	readDesc = [] # type: List[str]
+	writeDesc = [] # type: List[str]
+	descFormat = {} # type: Dict[str, str]
+	descExt = {} # type: Dict[str, str]
+	extFormat = {} # type: Dict[str, str]
 
 	@classmethod
-	def loadPlugins(cls: ClassVar, directory: str) -> None:
+	def loadPlugins(cls, directory: str) -> None:
 		"""
 		executed on startup.  as name implies, loads plugins from directory
 		"""
@@ -146,7 +151,7 @@ class Glossary(GlossaryType):
 		sys.path.pop()
 
 	@classmethod
-	def loadPlugin(cls: ClassVar, pluginName: str) -> None:
+	def loadPlugin(cls, pluginName: str) -> None:
 		try:
 			plugin = __import__(pluginName)
 		except ModuleNotFoundError as e:
@@ -188,22 +193,13 @@ class Glossary(GlossaryType):
 		except AttributeError:
 			pass
 		else:
-			for attr in (
-				"__init__",
-				"open",
-				"close",
-				"__len__",
-				"__iter__",
-			):
-				if not hasattr(Reader, attr):
-					log.error(
-						"Invalid Reader class in \"%s\" plugin" % format +
-						", no \"%s\" method" % attr
-					)
-					break
-			else:
+			if issubclass(Reader, BaseReader):
 				cls.readerClasses[format] = Reader
 				hasReadSupport = True
+			else:
+				log.error(
+					"Invalid Reader class in \"%s\" plugin, not subclass of BaseReader" % format,
+				)
 
 		try:
 			cls.readFunctions[format] = plugin.read
@@ -232,25 +228,22 @@ class Glossary(GlossaryType):
 		return plugin
 
 	def clear(self) -> None:
-		self._info = odict()
+		self._info = odict() # type: Dict[str, Any]
 
-		self._data = []
+		self._data = [] # type: List[Union[Tuple[str, str], Tuple[str, str, str]]]
 
-		try:
-			readers = self._readers
-		except AttributeError:
-			pass
-		else:
-			for reader in readers:
-				try:
-					reader.close()
-				except Exception:
-					log.exception("")
-		self._readers = []
+		readers = self._readers # type: List[BaseReader]
+		for reader in readers:
+			try:
+				reader.close()
+			except Exception:
+				log.exception("")
 
-		self._iter = None
-		self._entryFilters = []
-		self._sortKey = None
+		self._readers = [] # type: List[BaseReader]
+
+		self._iter = None # type: Optional[Iterator[BaseEntry]]
+		self._entryFilters = [] # type: List[EntryFilter]
+		self._sortKey = None # type: Optional[Callable[[str], Any]]
 		self._sortCacheSize = 1000
 
 		self._filename = ""
@@ -263,6 +256,7 @@ class Glossary(GlossaryType):
 			  no need to copy OrderedDict instance,
 			  we will not reference to it
 		"""
+		self._readers = [] # type: List[BaseReader]
 		self.clear()
 		if info:
 			if not isinstance(info, (dict, odict)):
@@ -312,7 +306,7 @@ class Glossary(GlossaryType):
 	def __str__(self) -> str:
 		return "glossary.Glossary"
 
-	def addEntryObj(self, entry: Entry) -> None:
+	def addEntryObj(self, entry: BaseEntry) -> None:
 		self._data.append(entry.getRaw())
 
 	def newEntry(self, word: str, defi: str, defiFormat: str = "") -> Entry:
@@ -373,9 +367,10 @@ class Glossary(GlossaryType):
 			if not entry:
 				continue
 			for entryFilter in self._entryFilters:
-				entry = entryFilter.run(entry)
-				if not entry:
+				newEntry = entryFilter.run(entry)
+				if not newEntry:
 					break
+				entry = newEntry
 			else:
 				yield entry
 
@@ -388,7 +383,7 @@ class Glossary(GlossaryType):
 			return iter([])
 		return self._iter
 
-	def iterEntryBuckets(self, size: int) -> Iterator[BaseEntry]:
+	def iterEntryBuckets(self, size: int) -> Iterator[List[BaseEntry]]:
 		"""
 		iterate over buckets of entries, with size `size`
 		For example:
@@ -398,7 +393,7 @@ class Glossary(GlossaryType):
 					print(entry.getWord())
 				print("-----------------")
 		"""
-		bucket = []
+		bucket = [] # type: List[BaseEntry]
 		for entry in self:
 			if len(bucket) >= size:
 				yield bucket
@@ -428,7 +423,7 @@ class Glossary(GlossaryType):
 
 	# def formatInfoKeys(self, format: str):# FIXME
 
-	def iterInfo(self) -> Iterator[Tuple[str, str]]:
+	def iterInfo(self) -> ItemsView[str, Any]:
 		return self._info.items()
 
 	def getInfo(self, key: str) -> str:
@@ -457,7 +452,7 @@ class Glossary(GlossaryType):
 
 		self._info[key] = value
 
-	def getExtraInfos(self, excludeKeys: List[str]) -> odict:
+	def getExtraInfos(self, excludeKeys: List[str]) -> Dict[str, Any]:
 		"""
 		excludeKeys: a list of (basic) info keys to be excluded
 		returns an OrderedDict including the rest of info keys,
@@ -471,7 +466,7 @@ class Glossary(GlossaryType):
 			except KeyError:
 				pass
 
-		extra = odict()
+		extra = odict() # type: Dict[str, Any]
 		for key, value in self._info.items():
 			if key in excludeKeySet:
 				continue
@@ -615,7 +610,7 @@ class Glossary(GlossaryType):
 					"No `Reader` class found in %s plugin" % format +
 					", falling back to indirect mode"
 				)
-			result = self.readFunctions[format].__call__(
+			result = self.readFunctions[format](
 				self,
 				filename,
 				**options
@@ -629,7 +624,7 @@ class Glossary(GlossaryType):
 
 		return True
 
-	def loadReader(self, reader: Any) -> bool:
+	def loadReader(self, reader: BaseReader) -> bool:
 		"""
 		iterates over `reader` object and loads the whole data into self._data
 		must call `reader.open(filename)` before calling this function
@@ -666,7 +661,7 @@ class Glossary(GlossaryType):
 		"""
 		for reader in self._readers:
 			self.loadReader(reader)
-		self._readers = []
+		self._readers = [] # type: List[BaseReader]
 
 	def _updateIter(self, sort: bool = False) -> None:
 		"""
@@ -683,17 +678,15 @@ class Glossary(GlossaryType):
 				cacheSize = self._sortCacheSize
 				log.info("Stream sorting enabled, cache size: %s", cacheSize)
 				# only sort by main word, or list of words + alternates? FIXME
-				gen = hsortStreamList(
+				self._iter = self._applyEntryFiltersGen(iter(hsortStreamList(
 					self._readers,
 					cacheSize,
 					key=Entry.getEntrySortKey(sortKey),
-				)
+				)))
 			else:
-				gen = self._readersEntryGen()
+				self._iter = self._applyEntryFiltersGen(self._readersEntryGen())
 		else:
-			gen = self._loadedEntryGen()
-
-		self._iter = self._applyEntryFiltersGen(gen)
+			self._iter = self._applyEntryFiltersGen(self._loadedEntryGen())
 
 	def sortWords(self, key: Optional[Callable[[str], Any]] = None, cacheSize: int = 0) -> None:
 		# only sort by main word, or list of words + alternates? FIXME
@@ -751,21 +744,21 @@ class Glossary(GlossaryType):
 							ext = fext
 			if not format:
 				log.error("Unable to detect write format!")
-				return
+				return None
 
 		else:  # filename is empty
 			if not self._filename:
 				log.error("Invalid filename %r", filename)
-				return
+				return None
 			filename = self._filename  # no extension
 			if not format:
 				log.error("No filename nor format is given for output file")
-				return
+				return None
 			try:
 				filename += Glossary.formatsExt[format][0]
 			except KeyError:
 				log.error("Invalid write format")
-				return
+				return None
 
 
 		return filename, format, archiveType
@@ -797,7 +790,7 @@ class Glossary(GlossaryType):
 			validOptionKeys = self.formatsWriteOptions[format]
 		except KeyError:
 			log.critical("No write support for \"%s\" format", format)
-			return
+			return None
 		for key in list(options.keys()):
 			if key not in validOptionKeys:
 				log.error(
@@ -866,10 +859,10 @@ class Glossary(GlossaryType):
 		filename = abspath(filename)
 		log.info("Writing to file \"%s\"", filename)
 		try:
-			self.writeFunctions[format].__call__(self, filename, **options)
+			self.writeFunctions[format](self, filename, **options)
 		except Exception:
 			log.exception("Exception while calling plugin\'s write function")
-			return
+			return None
 		finally:
 			self.clear()
 
@@ -950,12 +943,14 @@ class Glossary(GlossaryType):
 		)
 		if not outputArgs:
 			log.error("Writing file \"%s\" failed.", outputFilename)
-			return
+			return None
 		outputFilename, outputFormat, archiveType = outputArgs
 
 		if direct is None:
 			if sort is not True:
 				direct = True  # FIXME
+			else:
+				direct = False
 
 		tm0 = now()
 		if not self.read(
@@ -965,7 +960,7 @@ class Glossary(GlossaryType):
 			progressbar=progressbar,
 			**readOptions
 		):
-			return
+			return None
 		log.info("")
 
 		finalOutputFile = self.write(
@@ -979,7 +974,7 @@ class Glossary(GlossaryType):
 		log.info("")
 		if not finalOutputFile:
 			log.error("Writing file \"%s\" failed.", outputFilename)
-			return
+			return None
 
 		if archiveType:
 			finalOutputFile = self.archiveOutDir(finalOutputFile, archiveType)
@@ -997,7 +992,7 @@ class Glossary(GlossaryType):
 		sep2: str,
 		filename: str = "",
 		writeInfo: bool = True,
-		rplList: Optional[List[Tuple[str, str]]] = None,
+		rplList: Optional[Sequence[Tuple[str, str]]] = None,
 		ext: str = ".txt",
 		head: str = "",
 		iterEntries: Optional[Iterator[BaseEntry]] = None,
@@ -1032,7 +1027,7 @@ class Glossary(GlossaryType):
 			os.mkdir(myResDir)
 
 		if not iterEntries:
-			iterEntries = self
+			iterEntries = iter(self)
 
 		for entry in iterEntries:
 			if entry.isData():
@@ -1040,9 +1035,11 @@ class Glossary(GlossaryType):
 					entry.save(myResDir)
 
 			if entryFilterFunc:
-				entry = entryFilterFunc(entry)
-				if not entry:
+				newEntry = entryFilterFunc(entry)
+				if not newEntry:
 					continue
+				entry = newEntry 
+
 			word = entry.getWord()
 			defi = entry.getDefi()
 			if word.startswith("#"):  # FIXME
@@ -1218,7 +1215,7 @@ class Glossary(GlossaryType):
 			re.U,
 		)
 		wordPattern = re.compile("[\w]{%d,}" % minWordLen, re.U)
-		outRel = []
+		outRel = [] # type: List[Tuple]
 		for item in self._data:
 			words, defi = item[:2]
 			if isinstance(words, str):
@@ -1228,7 +1225,7 @@ class Glossary(GlossaryType):
 			if st not in defi:
 				continue
 			for word in words:
-				rel = 0  # relation value of word (0 <= rel <= 1)
+				rel = 0.0  # relation value of word (0 <= rel <= 1)
 				for part in re.split(splitPattern, defi):
 					if not part:
 						continue
@@ -1370,7 +1367,7 @@ class Glossary(GlossaryType):
 							defi = ", ".join(result) + "."
 					except Exception:
 						log.exception("")
-						log.pretty(result, "result = ")
+						log.debug("result = " + pformat(result))
 						return
 					saveFile.write("%s\t%s\n" % (word, defi))
 				yield wordI

@@ -29,6 +29,7 @@ from pyglossary.text_utils import urlToPath
 from pyglossary.os_utils import click_website
 from pyglossary.glossary import *
 from .base import *
+from pyglossary import logger
 from pyglossary import core
 
 import gi
@@ -527,12 +528,12 @@ class UI(gtk.Dialog, MyDialog, UIBase):
 		pack(hbox, hbox.verbosityLabel, 0, 0)
 		##
 		self.verbosityCombo = combo = gtk.ComboBoxText()
-		for level, levelName in enumerate(log.levelNamesCap):
+		for level, levelName in enumerate(logger.levelNamesCap):
 			combo.append_text("%s - %s" % (
 				level,
 				_(levelName)
 			))
-		combo.set_active(log.getVerbosity())
+		combo.set_active(logger.getVerbosity())
 		combo.set_border_width(0)
 		combo.connect("changed", self.verbosityComboChanged)
 		pack(hbox, combo, 0, 0)
