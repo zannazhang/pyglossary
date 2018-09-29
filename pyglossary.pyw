@@ -230,6 +230,10 @@ core.checkCreateConfDir()
 from pyglossary.glossary import Glossary
 from ui.ui_cmd import COMMAND, help, parseFormatOptionsStr
 
+import typing
+if typing.TYPE_CHECKING:
+	import pyglossary.plugin_static_imports
+
 ##############################
 
 
