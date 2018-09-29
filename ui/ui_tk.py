@@ -39,6 +39,18 @@ endFormat = "\x1b[0;0;0m"  # End Format #len=8
 startRed = "\x1b[31m"
 
 
+readFormatsDescByExt = {
+	ext: Glossary.formatsDesc[name]
+	for name in Glossary.readFormats
+	for ext in Glossary.formatsExt[name]
+}
+
+writeFormatsDescByExt = {
+	ext: Glossary.formatsDesc[name]
+	for name in Glossary.writeFormats
+	for ext in Glossary.formatsExt[name]
+}
+
 noneItem = "Not Selected"
 
 
@@ -684,9 +696,9 @@ class UI(tix.Frame, UIBase):
 				ext = os.path.splitext(pathI)[-1].lower()
 				if ext in (".gz", ".bz2", ".zip"):
 					ext = os.path.splitext(pathI[:-len(ext)])[-1].lower()
-				format = Glossary.extFormat.get(ext)
-				if format is not None:
-					self.combobox_i.set(Glossary.formatsDesc[format])
+				desc = readFormatsDescByExt.get(ext)
+				if desc is not None:
+					self.combobox_i.set(desc)
 			if self.pref["ui_autoSetOutputFileName"]:  # format==noneItem:
 				# pathI = self.entry_i.get()
 				formatOD = self.combobox_o.get()
@@ -709,9 +721,9 @@ class UI(tix.Frame, UIBase):
 				ext = os.path.splitext(pathO)[-1].lower()
 				if ext in (".gz", ".bz2", ".zip"):
 					ext = os.path.splitext(pathO[:-len(ext)])[-1].lower()
-				format = Glossary.extFormat.get(ext)
-				if format is not None:
-					self.combobox_o.set(Glossary.formatsDesc[format])
+				desc = writeFormatsDescByExt.get(ext)
+				if desc is not None:
+					self.combobox_o.set(desc)
 			self.pathO = pathO
 
 	def browse_i(self):
