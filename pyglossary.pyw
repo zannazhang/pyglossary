@@ -217,7 +217,10 @@ logger.setVerbosity(args.verbosity)
 log.addHandler(
 	logger.StdLogHandler(noColor=args.noColor),
 )
-logger.overrideExceptHook() # only after StdLogHandler is added
+
+# FIXME: this hides expeptions in initializing UI
+# logger.overrideExceptHook() # only after StdLogHandler is added
+
 # with the logger setted up, we can import other pyglossary modules, so they
 # can do some loggging in right way.
 
