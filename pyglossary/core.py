@@ -89,4 +89,5 @@ else:
 
 confJsonFile = join(confDir, "config.json")
 rootConfJsonFile = join(dataDir, "config.json")
+pluginsDir = join(rootDir, "pyglossary", "plugins")
 userPluginsDir = join(confDir, "plugins")

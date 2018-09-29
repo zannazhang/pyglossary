@@ -1,0 +1,249 @@
+{
+    "ABBYYLingvoDSL": {
+        "canRead": true,
+        "canWrite": false,
+        "description": "ABBYY Lingvo DSL (dsl)",
+        "enable": true,
+        "extentions": [
+            ".dsl"
+        ],
+        "filename": "dsl"
+    },
+    "AppleDict": {
+        "canRead": false,
+        "canWrite": true,
+        "description": "AppleDict Source (xml)",
+        "enable": true,
+        "extentions": [
+            ".xml"
+        ],
+        "filename": "appledict"
+    },
+    "BabylonBgl": {
+        "canRead": true,
+        "canWrite": false,
+        "description": "Babylon (bgl)",
+        "enable": true,
+        "extentions": [
+            ".bgl"
+        ],
+        "filename": "babylon_bgl"
+    },
+    "BabylonSource": {
+        "canRead": false,
+        "canWrite": true,
+        "description": "Babylon Source (gls)",
+        "enable": true,
+        "extentions": [
+            ".gls",
+            ".babylon"
+        ],
+        "filename": "babylon_source"
+    },
+    "CC-CEDICT": {
+        "canRead": true,
+        "canWrite": false,
+        "description": "CC-CEDICT",
+        "enable": true,
+        "extentions": [
+            ".u8"
+        ],
+        "filename": "cc_cedict"
+    },
+    "Csv": {
+        "canRead": true,
+        "canWrite": true,
+        "description": "CSV",
+        "enable": true,
+        "extentions": [
+            ".csv"
+        ],
+        "filename": "csv_pyg"
+    },
+    "Dicformids": {
+        "canRead": true,
+        "canWrite": true,
+        "description": "DictionaryForMIDs",
+        "enable": true,
+        "extentions": [
+            ".mids"
+        ],
+        "filename": "dicformids"
+    },
+    "DictOrg": {
+        "canRead": true,
+        "canWrite": true,
+        "description": "DICT.org file format (.index)",
+        "enable": true,
+        "extentions": [
+            ".index"
+        ],
+        "filename": "dict_org"
+    },
+    "Edlin": {
+        "canRead": true,
+        "canWrite": true,
+        "description": "Editable Linked List of Entries",
+        "enable": true,
+        "extentions": [
+            ".edlin"
+        ],
+        "filename": "edlin"
+    },
+    "Freedict": {
+        "canRead": false,
+        "canWrite": true,
+        "description": "FreeDict (tei)",
+        "enable": true,
+        "extentions": [
+            ".tei"
+        ],
+        "filename": "freedict"
+    },
+    "GettextPo": {
+        "canRead": true,
+        "canWrite": true,
+        "description": "Gettext Source (po)",
+        "enable": true,
+        "extentions": [
+            ".po"
+        ],
+        "filename": "gettext_po"
+    },
+    "LingoesLDF": {
+        "canRead": true,
+        "canWrite": true,
+        "description": "Lingoes Source (LDF)",
+        "enable": true,
+        "extentions": [
+            ".ldf"
+        ],
+        "filename": "lingoes_ldf"
+    },
+    "OctopusMdict": {
+        "canRead": true,
+        "canWrite": false,
+        "description": "Octopus MDict",
+        "enable": true,
+        "extentions": [
+            ".mdx"
+        ],
+        "filename": "octopus_mdict"
+    },
+    "OctopusMdictSource": {
+        "canRead": true,
+        "canWrite": true,
+        "description": "Octopus MDict Source",
+        "enable": true,
+        "extentions": [
+            ".mtxt"
+        ],
+        "filename": "octopus_mdict_source"
+    },
+    "Omnidic": {
+        "canRead": false,
+        "canWrite": true,
+        "description": "Omnidic",
+        "enable": true,
+        "extentions": [
+            ".omni",
+            ".omnidic"
+        ],
+        "filename": "omnidic"
+    },
+    "Sdict": {
+        "canRead": true,
+        "canWrite": false,
+        "description": "Sdictionary Binary(dct)",
+        "enable": true,
+        "extentions": [
+            ".dct"
+        ],
+        "filename": "sdict"
+    },
+    "SdictSource": {
+        "canRead": false,
+        "canWrite": true,
+        "description": "Sdictionary Source (sdct)",
+        "enable": true,
+        "extentions": [
+            ".sdct"
+        ],
+        "filename": "sdict_source"
+    },
+    "Sql": {
+        "canRead": false,
+        "canWrite": true,
+        "description": "SQL",
+        "enable": true,
+        "extentions": [
+            ".sql"
+        ],
+        "filename": "sql"
+    },
+    "Stardict": {
+        "canRead": true,
+        "canWrite": true,
+        "description": "StarDict (ifo)",
+        "enable": true,
+        "extentions": [
+            ".ifo"
+        ],
+        "filename": "stardict"
+    },
+    "Tabfile": {
+        "canRead": true,
+        "canWrite": true,
+        "description": "Tabfile (txt, dic)",
+        "enable": true,
+        "extentions": [
+            ".txt",
+            ".tab",
+            ".dic"
+        ],
+        "filename": "tabfile"
+    },
+    "Test": {
+        "canRead": false,
+        "canWrite": false,
+        "description": "Test Format File(.test)",
+        "enable": true,
+        "extentions": [
+            ".test",
+            ".tst"
+        ],
+        "filename": "testformat"
+    },
+    "Treedict": {
+        "canRead": false,
+        "canWrite": true,
+        "description": "TreeDict",
+        "enable": true,
+        "extentions": [
+            ".tree",
+            ".treedict"
+        ],
+        "filename": "treedict"
+    },
+    "WikipediaDump": {
+        "canRead": true,
+        "canWrite": false,
+        "description": "Wikipedia Dump(Static HTML)",
+        "enable": true,
+        "extentions": [
+            ".wiki"
+        ],
+        "filename": "wikipedia_dump"
+    },
+    "Xdxf": {
+        "canRead": true,
+        "canWrite": false,
+        "description": "XDXF",
+        "enable": true,
+        "extentions": [
+            ".xdxf",
+            ".xml"
+        ],
+        "filename": "xdxf"
+    }
+}

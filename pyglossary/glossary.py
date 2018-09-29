@@ -61,7 +61,12 @@ from typing import (
 from .logger import log
 from .flags import *
 from . import core
-from .core import VERSION, userPluginsDir
+from .core import (
+	VERSION,
+	rootDir,
+	pluginsDir,
+	userPluginsDir,
+)
 from .entry_base import BaseEntry
 from .entry import Entry, DataEntry
 from .entry_filters_base import EntryFilter
@@ -119,13 +124,16 @@ class Glossary(GlossaryType):
 		"license": "copyright",
 	}
 	plugins = {} # type: Dict[str, Any] # format => pluginModule
+	canReadWrite = {} # type: Dict[str, Tuple[bool, bool]]
 	readFormats = set() # type: Set[str]
 	writeFormats = set() # type: Set[str]
 	readFunctions = {} # type: Dict[str, Callable]
 	readerClasses = {} # type: Dict[str, BaseReader]
 	writeFunctions = {} # type: Dict[str, Callable]
+	formatsFilename = {} # type: Dict[str, str]
+	formatsByFilename = {} # type: Dict[str, str]
 	formatsDesc = {} # type: Dict[str, str]
-	formatsExt = {} # type: Dict[str, str]
+	formatsExt = {} # type: Dict[str, List[str]]
 	formatsReadOptions = {} # type: Dict[str, Any]
 	formatsWriteOptions = {} # type: Dict[str, Any]
 	readDesc = set() # type: Set[str]
@@ -133,6 +141,63 @@ class Glossary(GlossaryType):
 	descFormat = {} # type: Dict[str, str]
 	descExt = {} # type: Dict[str, str]
 	extFormat = {} # type: Dict[str, str]
+
+	notPluginFilenames = set([
+		"formats_common",
+		"paths",
+		"stardict_tests", # FIXME: move stardict*.py to stardict/
+	])
+
+	@classmethod
+	def savePluginsJson(cls) -> None:
+		import json
+		info = {} # type: Dict[str, Dict]
+		for name, p in cls.plugins.items():
+			canRead, canWrite = cls.canReadWrite[p.format]
+			info[name] = {
+				"filename": p.filename,
+				"enable": p.enable,
+				"description": p.description,
+				"extentions": p.extentions,
+				"canRead": canRead,
+				"canWrite": canWrite,
+			}
+		with open(join(rootDir, "pyglossary", "plugins.json"), "w") as file:
+			json.dump(
+				info,
+				file,
+				sort_keys=True,
+				indent=2,
+				ensure_ascii=True,
+			)
+
+	@classmethod
+	def loadPluginsJson(cls) -> None:
+		import json
+		# info = {} # type: Dict[str, Dict[str, Any]]
+		with open(join(rootDir, "pyglossary", "plugins.json")) as file:
+			info = json.load(file)
+		for format, item in info.items():
+			filename = item["filename"] # type: str
+			desc = item["description"] # type: str
+			extentions = item["extentions"] # type: List[str]
+			canRead = item["canRead"] # type: bool
+			canWrite = item["canWrite"] # type: bool
+			cls.descFormat[desc] = format
+			cls.descExt[desc] = extentions[0]
+			for ext in extentions:
+				cls.extFormat[ext] = format
+			cls.formatsFilename[format] = filename
+			cls.formatsByFilename[filename] = format
+			cls.formatsExt[format] = extentions
+			cls.formatsDesc[format] = desc
+			cls.canReadWrite[format] = (canRead, canWrite)
+			if canRead:
+				cls.readFormats.add(format)
+				cls.readDesc.add(desc)
+			if canWrite:
+				cls.writeFormats.add(format)
+				cls.writeDesc.add(desc)
 
 	@classmethod
 	def loadPlugins(cls, directory: str) -> None:
@@ -144,25 +209,28 @@ class Glossary(GlossaryType):
 			log.error("Invalid plugin directory: %r", directory)
 			return
 
-		sys.path.append(directory)
-		for _, pluginName, _ in pkgutil.iter_modules([directory]):
-			cls.loadPlugin(pluginName)
-		sys.path.pop()
+		for _, pluginFilename, _ in pkgutil.iter_modules([directory]):
+			cls.loadPlugin(directory, pluginFilename)
 
 	@classmethod
-	def loadPlugin(cls, pluginName: str) -> None:
+	def loadPlugin(cls, directory: str, pluginFilename: str) -> Any:
+		sys.path.append(directory)
 		try:
-			plugin = __import__(pluginName)
-		except ModuleNotFoundError as e:
-			log.warning("Module %r not found, skipping plugin %r", e.name, pluginName)
-			return
+			plugin = getattr(__import__(
+				"pyglossary.plugins",
+				fromlist=[pluginFilename],
+			), pluginFilename)
 		except Exception as e:
-			log.exception("Error while importing plugin %s", pluginName)
-			return
+			log.exception("Error while importing plugin %s", pluginFilename)
+			raise e
+		finally:
+			sys.path.pop()
 
 		if (not hasattr(plugin, "enable")) or (not plugin.enable):
-			log.debug("Plugin disabled or not a plugin: %s", pluginName)
+			log.warning("Plugin disabled or not a plugin: %s", pluginFilename)
 			return
+
+		plugin.filename = pluginFilename
 
 		format = plugin.format
 
@@ -179,6 +247,8 @@ class Glossary(GlossaryType):
 			desc = "%s (%s)" % (format, extentions[0])
 
 		cls.plugins[format] = plugin
+		cls.formatsFilename[format] = pluginFilename
+		cls.formatsByFilename[pluginFilename] = format
 		cls.descFormat[desc] = format
 		cls.descExt[desc] = extentions[0]
 		for ext in extentions:
@@ -187,6 +257,8 @@ class Glossary(GlossaryType):
 		cls.formatsDesc[format] = desc
 
 		hasReadSupport = False
+		hasWriteSupport = False
+
 		try:
 			Reader = plugin.Reader
 		except AttributeError:
@@ -213,6 +285,7 @@ class Glossary(GlossaryType):
 			cls.formatsReadOptions[format] = getattr(plugin, "readOptions", [])
 
 		if hasattr(plugin, "write"):
+			hasWriteSupport = True
 			cls.writeFunctions[format] = plugin.write
 			cls.writeFormats.add(format)
 			cls.writeDesc.add(desc)
@@ -222,7 +295,27 @@ class Glossary(GlossaryType):
 				[]
 			)
 
+		cls.canReadWrite[format] = (hasReadSupport, hasWriteSupport)
+
 		return plugin
+
+
+	@classmethod
+	def loadPluginsUnlisted(cls, directory: str) -> None:
+		for _, pluginFilename, _ in pkgutil.iter_modules([directory]):
+			if pluginFilename in cls.formatsByFilename:
+				continue
+			if pluginFilename in cls.notPluginFilenames:
+				continue
+			cls.loadPlugin(directory, pluginFilename)
+
+	@classmethod
+	def loadPluginByFormat(cls, format: str) -> None:
+		if format in cls.plugins:
+			return
+		filename = cls.formatsFilename[format]
+		#cls.loadPlugin("pyglossary.plugins." + filename)
+		cls.loadPlugin(pluginsDir, filename)
 
 	def clear(self) -> None:
 		self._info = odict() # type: Dict[str, Any]
@@ -563,14 +656,18 @@ class Glossary(GlossaryType):
 					ext = get_ext(filename)
 					delFile = True
 		if not format:
-			for key in Glossary.formatsExt.keys():
-				if ext in Glossary.formatsExt[key]:
+			for key, extList in Glossary.formatsExt.items():
+				if ext in extList:
 					format = key
 			if not format:
 				# if delFile:
 				#	os.remove(filename)
 				log.error("Unknown extension \"%s\" for read support!", ext)
+
 				return False
+
+		Glossary.loadPluginByFormat(format)
+
 		validOptionKeys = self.formatsReadOptions[format]
 		for key in list(options.keys()):
 			if key not in validOptionKeys:
@@ -783,6 +880,9 @@ class Glossary(GlossaryType):
 		"""
 		if isdir(filename):
 			filename = join(filename, basename(self._filename))
+
+		Glossary.loadPluginByFormat(format)
+
 		try:
 			validOptionKeys = self.formatsWriteOptions[format]
 		except KeyError:
@@ -1373,5 +1473,8 @@ class Glossary(GlossaryType):
 		yield wordCount
 
 
-Glossary.loadPlugins(join(dirname(__file__), "plugins"))
+#Glossary.loadPlugins(pluginsDir)
+Glossary.loadPluginsJson()
+Glossary.loadPluginsUnlisted(pluginsDir)
 Glossary.loadPlugins(userPluginsDir)
+#Glossary.savePluginsJson()
