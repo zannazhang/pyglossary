@@ -128,8 +128,6 @@ class Glossary(GlossaryType):
 	formatsExt = {} # type: Dict[str, str]
 	formatsReadOptions = {} # type: Dict[str, Any]
 	formatsWriteOptions = {} # type: Dict[str, Any]
-	readExt = [] # type: List[str]
-	writeExt = [] # type: List[str]
 	readDesc = set() # type: Set[str]
 	writeDesc = set() # type: Set[str]
 	descFormat = {} # type: Dict[str, str]
@@ -211,14 +209,12 @@ class Glossary(GlossaryType):
 
 		if hasReadSupport:
 			cls.readFormats.add(format)
-			cls.readExt.append(extentions)
 			cls.readDesc.add(desc)
 			cls.formatsReadOptions[format] = getattr(plugin, "readOptions", [])
 
 		if hasattr(plugin, "write"):
 			cls.writeFunctions[format] = plugin.write
 			cls.writeFormats.add(format)
-			cls.writeExt.append(extentions)
 			cls.writeDesc.add(desc)
 			cls.formatsWriteOptions[format] = getattr(
 				plugin,
