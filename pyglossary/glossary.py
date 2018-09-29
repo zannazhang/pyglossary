@@ -48,6 +48,7 @@ from typing import (
 	Tuple,
 	List,
 	Sequence,
+	Set,
 	Any,
 	Optional,
 	Union,
@@ -118,8 +119,8 @@ class Glossary(GlossaryType):
 		"license": "copyright",
 	}
 	plugins = {} # type: Dict[str, Any] # format => pluginModule
-	readFormats = [] # type: List[str]
-	writeFormats = [] # type: List[str]
+	readFormats = set() # type: Set[str]
+	writeFormats = set() # type: Set[str]
 	readFunctions = {} # type: Dict[str, Callable]
 	readerClasses = {} # type: Dict[str, BaseReader]
 	writeFunctions = {} # type: Dict[str, Callable]
@@ -129,8 +130,8 @@ class Glossary(GlossaryType):
 	formatsWriteOptions = {} # type: Dict[str, Any]
 	readExt = [] # type: List[str]
 	writeExt = [] # type: List[str]
-	readDesc = [] # type: List[str]
-	writeDesc = [] # type: List[str]
+	readDesc = set() # type: Set[str]
+	writeDesc = set() # type: Set[str]
 	descFormat = {} # type: Dict[str, str]
 	descExt = {} # type: Dict[str, str]
 	extFormat = {} # type: Dict[str, str]
@@ -209,16 +210,16 @@ class Glossary(GlossaryType):
 			hasReadSupport = True
 
 		if hasReadSupport:
-			cls.readFormats.append(format)
+			cls.readFormats.add(format)
 			cls.readExt.append(extentions)
-			cls.readDesc.append(desc)
+			cls.readDesc.add(desc)
 			cls.formatsReadOptions[format] = getattr(plugin, "readOptions", [])
 
 		if hasattr(plugin, "write"):
 			cls.writeFunctions[format] = plugin.write
-			cls.writeFormats.append(format)
+			cls.writeFormats.add(format)
 			cls.writeExt.append(extentions)
-			cls.writeDesc.append(desc)
+			cls.writeDesc.add(desc)
 			cls.formatsWriteOptions[format] = getattr(
 				plugin,
 				"writeOptions",

@@ -130,14 +130,14 @@ class FormatComboBox(gtk.ComboBox):
 class InputFormatComboBox(FormatComboBox):
 	def __init__(self):
 		FormatComboBox.__init__(self)
-		for _format in Glossary.readFormats:
+		for _format in sorted(Glossary.readFormats):
 			self.addFormat(_format)
 
 
 class OutputFormatComboBox(FormatComboBox):
 	def __init__(self):
 		FormatComboBox.__init__(self)
-		for _format in Glossary.writeFormats:
+		for _format in sorted(Glossary.writeFormats):
 			self.addFormat(_format)
 
 

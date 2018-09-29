@@ -17,6 +17,7 @@
 # GNU General Public License for more details.
 
 
+from pyglossary import logger
 from pyglossary.core import homeDir
 from pyglossary.glossary import *
 from pyglossary.text_utils import urlToPath
@@ -52,6 +53,25 @@ def set_window_icon(window):
 		tk.PhotoImage(file=join(rootDir, "res", "pyglossary.png")),
 	)
 
+
+def newReadFormatCombo(frame):
+	comboVar = tk.StringVar()
+	readDescList = list(sorted(Glossary.readDesc))
+	combo = tk.OptionMenu(frame, comboVar, *tuple(readDescList))
+	# comboVar.set(readDescList[0])
+	comboVar.set(noneItem)
+	combo.pack(side="left")
+	return comboVar, combo
+
+
+def newWriteFormatCombo(frame):
+	comboVar = tk.StringVar()
+	writeDescList = list(sorted(Glossary.writeDesc))
+	combo = tk.OptionMenu(frame, comboVar, *tuple(writeDescList))
+	# comboVar.set(writeDescList[0])
+	comboVar.set(noneItem)
+	combo.pack(side="left")
+	return comboVar, combo
 
 class TkTextLogHandler(logging.Handler):
 	def __init__(self, tktext):
@@ -242,12 +262,7 @@ class UI(tix.Frame, UIBase):
 		label = tix.Label(frame, text="Read from format")
 		label.pack(side="left")
 		##
-		comboVar = tk.StringVar()
-		combo = tk.OptionMenu(frame, comboVar, *Glossary.readDesc)
-		# comboVar.set(Glossary.readDesc[0])
-		comboVar.set(noneItem)
-		combo.pack(side="left")
-		self.combobox_i = comboVar
+		self.combobox_i, combo = newReadFormatCombo(frame)
 		##
 		frame.pack(fill="x")
 		###################
@@ -277,13 +292,8 @@ class UI(tix.Frame, UIBase):
 		label = tix.Label(frame, text="Write to format    ")
 		label.pack(side="left")
 		##
-		comboVar = tk.StringVar()
-		combo = tk.OptionMenu(frame, comboVar, *Glossary.writeDesc)
-		# comboVar.set(Glossary.writeDesc[0])
-		comboVar.set(noneItem)
-		combo.pack(side="left")
+		self.combobox_o, combo = newWriteFormatCombo(frame)
 		combo.bind("<Configure>", self.combobox_o_changed)
-		self.combobox_o = comboVar
 		##
 		frame.pack(fill="x")
 		###################
@@ -374,7 +384,7 @@ class UI(tix.Frame, UIBase):
 			comboVar,
 			0, 1, 2, 3, 4,
 		)
-		comboVar.set(log.getVerbosity())
+		comboVar.set(logger.getVerbosity())
 		comboVar.trace("w", self.verbosityChanged)
 		combo.pack(side="left")
 		self.verbosityCombo = comboVar
@@ -420,12 +430,7 @@ class UI(tix.Frame, UIBase):
 		label = tix.Label(frame, text="Read from format")
 		label.pack(side="left")
 		##
-		comboVar = tk.StringVar()
-		combo = tk.OptionMenu(frame, comboVar, *Glossary.readDesc)
-		# comboVar.set(Glossary.readDesc[0])
-		comboVar.set(noneItem)
-		combo.pack(side="left")
-		self.combobox_r_i = comboVar
+		self.combobox_r_i, combo = newReadFormatCombo(frame)
 		##
 		frame.pack(fill="x")
 		###################
@@ -679,10 +684,9 @@ class UI(tix.Frame, UIBase):
 				ext = os.path.splitext(pathI)[-1].lower()
 				if ext in (".gz", ".bz2", ".zip"):
 					ext = os.path.splitext(pathI[:-len(ext)])[-1].lower()
-				for i in range(len(Glossary.readExt)):
-					if ext in Glossary.readExt[i]:
-						self.combobox_i.set(Glossary.readDesc[i])
-						break
+				format = Glossary.extFormat.get(ext)
+				if format is not None:
+					self.combobox_i.set(Glossary.formatsDesc[format])
 			if self.pref["ui_autoSetOutputFileName"]:  # format==noneItem:
 				# pathI = self.entry_i.get()
 				formatOD = self.combobox_o.get()
@@ -705,10 +709,9 @@ class UI(tix.Frame, UIBase):
 				ext = os.path.splitext(pathO)[-1].lower()
 				if ext in (".gz", ".bz2", ".zip"):
 					ext = os.path.splitext(pathO[:-len(ext)])[-1].lower()
-				for i in range(len(Glossary.writeExt)):
-					if ext in Glossary.writeExt[i]:
-						self.combobox_o.set(Glossary.writeDesc[i])
-						break
+				format = Glossary.extFormat.get(ext)
+				if format is not None:
+					self.combobox_o.set(Glossary.formatsDesc[format])
 			self.pathO = pathO
 
 	def browse_i(self):
