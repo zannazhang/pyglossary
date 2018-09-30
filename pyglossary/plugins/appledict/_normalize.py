@@ -19,6 +19,7 @@
 # GNU General Public License for more details.
 
 import re
+from .soup import BeautifulSoup
 
 _spaces_re = re.compile(r"[ \t\n]{2,}")
 _title_re = re.compile('<[^<]+?>|"|[<>]|\xef\xbb\xbf')
@@ -106,11 +107,11 @@ def truncate(text, length=449):
 	return text
 
 
-def title(title, BeautifulSoup):
+def title(title, cleanHTML: bool):
 	"""
 	strip double quotes and html tags.
 	"""
-	if BeautifulSoup:
+	if cleanHTML:
 		title = title.replace("\xef\xbb\xbf", "")
 		if len(title) > 1:
 			# BeautifulSoup has a bug when markup <= 1 char length

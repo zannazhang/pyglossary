@@ -27,6 +27,7 @@ from typing import Callable
 from typing.re import Pattern
 
 
+from .soup import BeautifulSoup
 from . import _normalize
 from pyglossary.plugins.formats_common import *
 
@@ -71,11 +72,11 @@ def indexes_generator(indexes_lang: str) -> Callable[[str, List[str], str, Any],
 			log.error(msg)
 			raise ValueError(msg)
 
-	def generate_indexes(title, alts, content, BeautifulSoup):
+	def generate_indexes(title, alts, content, cleanHTML: bool):
 		indexes = [title]
 		indexes.extend(alts)
 
-		if BeautifulSoup:
+		if cleanHTML:
 			quoted_title = BeautifulSoup.dammit.EntitySubstitution.substitute_xml(title, True)
 		else:
 			quoted_title = '"%s"' % title.replace(">", "&gt;").replace('"', "&quot;")
@@ -85,7 +86,7 @@ def indexes_generator(indexes_lang: str) -> Callable[[str, List[str], str, Any],
 
 		normal_indexes = set()
 		for idx in indexes:
-			normal = _normalize.title(idx, BeautifulSoup)
+			normal = _normalize.title(idx, cleanHTML)
 			normal_indexes.add(_normalize.title_long(normal))
 			normal_indexes.add(_normalize.title_short(normal))
 		normal_indexes.discard(title)
@@ -94,7 +95,7 @@ def indexes_generator(indexes_lang: str) -> Callable[[str, List[str], str, Any],
 		# skip empty titles.  everything could happen.
 
 		s = "<d:index d:value=%s d:title=%s/>" % (quoted_title, quoted_title)
-		if BeautifulSoup:
+		if cleanHTML:
 			for idx in normal_indexes:
 				s += "<d:index d:value=%s d:title=%s/>" % (
 					BeautifulSoup.dammit.EntitySubstitution.substitute_xml(idx, True),
@@ -149,7 +150,7 @@ def remove_style(tag: dict, line: str) -> None:
 		del tag["style"]
 
 
-def format_clean_content(title: Optional[str], body: str, BeautifulSoup: Any) -> str:
+def format_clean_content(title: Optional[str], body: str, cleanHTML: bool) -> str:
 	# heavily integrated with output of dsl reader plugin!
 	# and with xdxf also.
 	"""
@@ -164,7 +165,7 @@ def format_clean_content(title: Optional[str], body: str, BeautifulSoup: Any) ->
 	# <s> => <del>
 
 	# xhtml is strict
-	if BeautifulSoup:
+	if cleanHTML:
 		soup = BeautifulSoup.BeautifulSoup(body, "lxml", from_encoding="utf-8")
 		# difference between "lxml" and "html.parser"
 		if soup.body:

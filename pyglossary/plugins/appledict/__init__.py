@@ -27,6 +27,7 @@ import pkgutil
 import shutil
 
 from pyglossary.plugins.formats_common import *
+from .soup import BeautifulSoup
 from ._dict import *
 
 import xdxf
@@ -49,23 +50,6 @@ writeOptions = [
 	"indexes",  # str or None
 ]
 
-BeautifulSoup = None
-
-def loadBeautifulSoup():
-	global BeautifulSoup
-	try:
-		import bs4 as BeautifulSoup
-	except:
-		try:
-			import BeautifulSoup
-		except:
-			return
-	if int(BeautifulSoup.__version__.split(".")[0]) < 4:
-		raise ImportError(
-			"BeautifulSoup is too old, required at least version 4, " +
-			"%r found.\n" % BeautifulSoup.__version__ +
-			"Please run `sudo pip3 install lxml beautifulsoup4 html5lib`"
-		)
 
 def abspath_or_None(path):
 	return os.path.abspath(os.path.expanduser(path)) if path else None
@@ -168,23 +152,11 @@ def write(
 	additional indexes to dictionary entries.
 	# for now no languages supported yet.
 	"""
-	global BeautifulSoup
 
 	if not isdir(dirPath):
 		os.mkdir(dirPath)
 
 	xdxf.xdxf_init()
-
-	if cleanHTML:
-		if BeautifulSoup is None:
-			loadBeautifulSoup()
-		if BeautifulSoup is None:
-			log.warning(
-				"cleanHTML option passed but BeautifulSoup not found.  " +
-				"to fix this run `sudo pip3 install lxml beautifulsoup4 html5lib`"
-			)
-	else:
-		BeautifulSoup = None
 
 	fileNameBase = basename(dirPath).replace(".", "_")
 	filePathBase = join(dirPath, fileNameBase)
@@ -215,13 +187,13 @@ def write(
 			defi = entry.getDefi()
 
 			long_title = _normalize.title_long(
-				_normalize.title(word, BeautifulSoup)
+				_normalize.title(word, cleanHTML)
 			)
 			if not long_title:
 				continue
 
 			_id = next(generate_id)
-			if BeautifulSoup:
+			if cleanHTML:
 				title_attr = BeautifulSoup.dammit.EntitySubstitution\
 					.substitute_xml(long_title, True)
 			else:
@@ -231,11 +203,11 @@ def write(
 			if entry.getDefiFormat() == "x":
 				defi = xdxf.xdxf_to_html(defi)
 				content_title = None
-			content = format_clean_content(content_title, defi, BeautifulSoup)
+			content = format_clean_content(content_title, defi, cleanHTML)
 
 			toFile.write(
 				'<d:entry id="%s" d:title=%s>\n' % (_id, title_attr) +
-				generate_indexes(long_title, alts, content, BeautifulSoup) +
+				generate_indexes(long_title, alts, content, cleanHTML) +
 				content +
 				"\n</d:entry>\n"
 			)
@@ -259,7 +231,7 @@ def write(
 		)
 
 	copyright = glos.getInfo("copyright")
-	if BeautifulSoup:
+	if cleanHTML:
 		# strip html tags
 		copyright = str(BeautifulSoup.BeautifulSoup(
 			copyright,
