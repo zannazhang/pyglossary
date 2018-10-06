@@ -5,7 +5,7 @@
 	https://github.com/python/mypy
 """
 
-#import pyglossary.plugins.appledict
+import pyglossary.plugins.appledict
 #import pyglossary.plugins.babylon_bdc
 #import pyglossary.plugins.babylon_bgl
 #import pyglossary.plugins.babylon_source
